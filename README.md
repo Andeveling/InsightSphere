@@ -1,4 +1,23 @@
+<div align="center">
+
+# 🛠️ GitHub Tools & Next.js Project
+
+*A comprehensive toolkit for modern development workflows with TypeScript, React, Next.js, and Prisma*
+
+[![GitHub stars](https://img.shields.io/github/stars/Andeveling/github-tools?style=flat-square)](https://github.com/Andeveling/github-tools)
+[![GitHub issues](https://img.shields.io/github/issues/Andeveling/github-tools?style=flat-square)](https://github.com/Andeveling/github-tools/issues)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Features
+
+- 🎯 **AI-Optimized Instructions** - Load-on-demand instruction files for TypeScript, React, Next.js, Prisma, and Markdown
+- 🤖 **Custom Chat Modes** - Specialized AI assistants for planning, mentoring, code review, and project management
+- 📝 **Smart Prompts** - Ready-to-use prompts for README generation, implementation planning, and GitHub issue creation
+- 🔧 **Issue Templates** - Standardized templates for bug reports, feature requests, and documentation
 
 ## Getting Started
 
