@@ -67,6 +67,11 @@ const teamsData = [
   {
     name: "Team Gamma",
     description: "Equipo de diseño y experiencia de usuario"
+  },
+  // --- Equipo Nojau ---
+  {
+    name: "nojau",
+    description: "Startup Colombiana dedicada a la mensajeria masiva en whatsapp, shoppings cart para rotaciones y procesos de onboardings efectivos mediante entrenamientos y capsulas de conocimiento"
   }
 ]
 
@@ -131,6 +136,49 @@ const usersData = [
     hobbies: "Automatización, música, fútbol",
     description: "Me apasiona optimizar procesos y crear sistemas confiables. Siempre busco maneras de automatizar tareas repetitivas y mejorar la eficiencia del equipo.",
     teamIndex: 1
+  },
+  // --- Usuarios equipo nojau ---
+  {
+    name: "Dani Ramirez",
+    email: "dani@nojau.co",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Edwar Sanz",
+    email: "edwarsanz.nojau@gmail.com",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Jorge LEÓN",
+    email: "jorge@nojau.co",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Lore RIASCOS",
+    email: "lore@nojau.co",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Pao BLANDÓN",
+    email: "pao@nojau.co",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Vale RAMÍREZ",
+    email: "vale@nojau.co",
+    password: "password123",
+    teamIndex: 3
+  },
+  {
+    name: "Andres Parra",
+    email: "andres@nojau.co",
+    password: "password123",
+    teamIndex: 3
   }
 ]
 
