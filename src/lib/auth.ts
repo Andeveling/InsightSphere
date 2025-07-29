@@ -8,7 +8,7 @@ import type { User } from '@prisma/client'
 
 // Validation schema for credentials
 const credentialsSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(6),
 })
 
