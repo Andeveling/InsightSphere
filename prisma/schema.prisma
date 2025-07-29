@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Domain {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String
+  strengths   Strength[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("domains")
+}
+
+model Strength {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  description  String
+  domainId     String
+  domain       Domain         @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  userStrengths UserStrength[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("strengths")
+}
+
+model Team {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  users       User[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("teams")
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  hashedPassword String
+  age            Int?
+  career         String?
+  hobbies        String?
+  description    String?        // Personal description for game context
+  profileComplete Boolean       @default(false)
+  teamId         String?
+  team           Team?          @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  userStrengths  UserStrength[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model UserStrength {
+  id         String   @id @default(cuid())
+  userId     String
+  strengthId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  strength   Strength @relation(fields: [strengthId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, strengthId])
+  @@map("user_strengths")
+}
+
+model GameSession {
+  id          String   @id @default(cuid())
+  teamId      String?
+  subjectId   String   // User who is the subject of the game
+  questions   Json     // Array of AI-generated questions
+  responses   Json     // Player responses and rankings
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("game_sessions")
+}
