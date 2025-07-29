@@ -1,4 +1,4 @@
-import type { NextAuthConfig } from 'next-auth'
+import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { z } from 'zod'
 import { prisma } from './lib/prisma'
@@ -35,7 +35,7 @@ async function getUser(email: string): Promise<User | null> {
   }
 }
 
-export const authConfig = {
+export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: '/',
   },
@@ -86,4 +86,4 @@ export const authConfig = {
       },
     }),
   ],
-} satisfies NextAuthConfig
+})
