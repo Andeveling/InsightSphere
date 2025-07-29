@@ -1,4 +1,6 @@
-import { auth as NextAuthHandler } from '../../../../lib/auth'
+import NextAuth from 'next-auth'
+import { authConfig } from '../../../../../auth.config'
 
-// Handle both GET and POST for NextAuth.js
-export { NextAuthHandler as GET, NextAuthHandler as POST }
+const handler = NextAuth(authConfig)
+
+export { handler as GET, handler as POST }
