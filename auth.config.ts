@@ -2,7 +2,7 @@ import type { NextAuthConfig } from 'next-auth'
 
 export const authConfig = {
   pages: {
-    signIn: '/login',
+    signIn: '/',
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
@@ -11,7 +11,7 @@ export const authConfig = {
       const isOnProfile = nextUrl.pathname.startsWith('/profile')
       const isOnTeam = nextUrl.pathname.startsWith('/team')
       const isOnGame = nextUrl.pathname.startsWith('/game')
-      const isOnLogin = nextUrl.pathname.startsWith('/login')
+      const isOnLogin = nextUrl.pathname.startsWith('/')
 
       // Protect dashboard, profile, team, and game routes
       if (isOnDashboard || isOnProfile || isOnTeam || isOnGame) {
