@@ -1,25 +1,31 @@
-import { Home, Inbox, Calendar, Search, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
+import { BarChart3, Home, Settings, User } from "lucide-react";
+import AppSideBarFooter from "@/components/app-sidebar-footer";
 
 const items = [
-  { title: "Home", url: "/dashboard", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
+  { title: "Team Activity", url: "/dashboard/team", icon: BarChart3 },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
+
+
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>InsightSphere</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -36,6 +42,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+              <AppSideBarFooter />
     </Sidebar>
   );
 }
