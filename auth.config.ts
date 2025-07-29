@@ -39,6 +39,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: '/',
   },
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
@@ -59,9 +62,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
       return true
     },
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.email = user.email
+        token.name = user.name
+      }
+      return token
+    },
+    session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+      }
+      return session
+    },
   },
   providers: [
     Credentials({
+      credentials: {
+        email: { 
+          label: 'Email', 
+          type: 'email',
+          placeholder: 'email@example.com'
+        },
+        password: { 
+          label: 'Password', 
+          type: 'password',
+          placeholder: '••••••••'
+        },
+      },
       async authorize(credentials) {
         const parsedCredentials = credentialsSchema.safeParse(credentials)
 
@@ -77,7 +108,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Return user object without password
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { hashedPassword: _, ...userWithoutPassword } = user
-            return userWithoutPassword
+            return {
+              id: userWithoutPassword.id,
+              email: userWithoutPassword.email,
+              name: userWithoutPassword.name,
+            }
           }
         }
 
