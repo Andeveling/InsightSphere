@@ -1,6 +1,5 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import Navigation from '@/components/ui/navigation'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -11,7 +10,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen font-sans text-foreground bg-background flex flex-col items-center">
-      <Navigation />
       <main className="w-full flex justify-center py-12 px-2 sm:px-4 lg:px-8">
         <div className="w-full max-w-5xl rounded-xl shadow p-10 border border-border bg-card">
           <h1 className="text-3xl font-bold mb-6 text-primary">
