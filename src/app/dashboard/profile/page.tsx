@@ -1,20 +1,51 @@
-// src/app/profile/page.tsx
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { ProfileForm } from "@/components/profile/profile-form";
 
 export default async function ProfilePage() {
   const session = await auth();
 
-  if (!session) {
-    redirect("/login");
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
   }
 
+  // Get user data with current strengths
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      userStrengths: {
+        select: { strengthId: true }
+      }
+    }
+  });
+
+  if (!user) {
+    redirect("/auth/signin");
+  }
+
+  // Get all domains with their strengths
+  const domains = await prisma.domain.findMany({
+    include: {
+      strengths: {
+        orderBy: { name: 'asc' }
+      }
+    },
+    orderBy: { name: 'asc' }
+  });
+
   return (
-    <main className="max-w-7xl mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold mb-4">Mi Perfil</h2>
-      <div className="rounded-lg border p-6 bg-background">
-        <p>Bienvenido a tu perfil. Aquí podrás ver y editar tu información personal y fortalezas.</p>
+    <div className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">Mi Perfil</h1>
+          <p className="text-muted-foreground">
+            Gestiona tu información personal y selecciona tus fortalezas principales.
+          </p>
+        </div>
+
+        <ProfileForm user={user} domains={domains} />
       </div>
-    </main>
+    </div>
   );
 }

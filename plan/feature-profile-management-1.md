@@ -30,6 +30,7 @@ This implementation plan covers the complete user profile management system (US-
 - **CON-001**: Use existing Prisma schema and database models
 - **CON-002**: Desktop-first design approach with mobile responsiveness
 - **CON-003**: Must integrate with existing authentication system
+- **CON-004**: Component organization follows feature-based structure (ui/ only for shadcn components)
 - **GUD-001**: Follow Next.js 15 App Router best practices
 - **GUD-002**: Use shadcn/ui components for consistent UI design
 - **GUD-003**: Implement proper TypeScript typing throughout
@@ -69,12 +70,12 @@ This implementation plan covers the complete user profile management system (US-
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-011 | Create /src/components/ui/strength-card.tsx component | | |
-| TASK-012 | Create /src/components/ui/domain-section.tsx for domain grouping | | |
-| TASK-013 | Create /src/components/ui/strengths-selector.tsx main component | | |
-| TASK-014 | Implement selection state management with max 5 limit | | |
-| TASK-015 | Add visual feedback for selected/unselected states | | |
-| TASK-016 | Implement domain-based color coding and visual hierarchy | | |
+| TASK-011 | Create /src/components/profile/strength-card.tsx component | ✅ | 2025-07-30 |
+| TASK-012 | Create /src/components/profile/domain-section.tsx for domain grouping | ✅ | 2025-07-30 |
+| TASK-013 | Create /src/components/profile/strengths-selector.tsx main component | ✅ | 2025-07-30 |
+| TASK-014 | Implement selection state management with max 5 limit | ✅ | 2025-07-30 |
+| TASK-015 | Add visual feedback for selected/unselected states | ✅ | 2025-07-30 |
+| TASK-016 | Implement domain-based color coding and visual hierarchy | ✅ | 2025-07-30 |
 
 ### Implementation Phase 4: Profile Form Implementation
 
@@ -82,13 +83,13 @@ This implementation plan covers the complete user profile management system (US-
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-017 | Create /src/components/ui/profile-form.tsx main form component | | |
-| TASK-018 | Implement age input field with validation (16-99 years) | | |
-| TASK-019 | Implement career input field with character limit validation | | |
-| TASK-020 | Implement hobbies textarea with character limit validation | | |
-| TASK-021 | Implement description textarea for AI context (required) | | |
-| TASK-022 | Integrate strengths selector into form with validation | | |
-| TASK-023 | Add form progress indicator showing completion status | | |
+| TASK-017 | Create /src/components/profile/profile-form.tsx main form component | ✅ | 2025-07-30 |
+| TASK-018 | Implement age input field with validation (16-99 years) | ✅ | 2025-07-30 |
+| TASK-019 | Implement career input field with character limit validation | ✅ | 2025-07-30 |
+| TASK-020 | Implement hobbies textarea with character limit validation | ✅ | 2025-07-30 |
+| TASK-021 | Implement description textarea for AI context (required) | ✅ | 2025-07-30 |
+| TASK-022 | Integrate strengths selector into form with validation | ✅ | 2025-07-30 |
+| TASK-023 | Add form progress indicator showing completion status | ✅ | 2025-07-30 |
 
 ### Implementation Phase 5: Form Validation & Error Handling
 
@@ -109,7 +110,7 @@ This implementation plan covers the complete user profile management system (US-
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-030 | Create /src/components/ui/profile-display.tsx for viewing profile | | |
+| TASK-030 | Create /src/components/profile/profile-display.tsx for viewing profile | | |
 | TASK-031 | Implement strengths display with domain organization | | |
 | TASK-032 | Create edit mode toggle and form pre-population | | |
 | TASK-033 | Add profile completion status indicator | | |
@@ -147,22 +148,73 @@ This implementation plan covers the complete user profile management system (US-
 - **DEP-007**: Database seeder with complete strength and domain data
 - **DEP-008**: Tailwind CSS classes for styling and responsive design
 
-## 5. Files
+## 4.1. Component Organization Strategy
+
+### Directory Structure
+```
+src/
+  components/
+    ui/                           # shadcn/ui components ONLY
+      ├── button.tsx
+      ├── input.tsx
+      ├── form.tsx
+      └── ...other shadcn components
+    profile/                      # Profile-specific components
+      ├── profile-form.tsx
+      ├── profile-display.tsx
+      ├── strengths-selector.tsx
+      ├── strength-card.tsx
+      └── domain-section.tsx
+    common/                       # Reusable components across features
+      ├── error-display.tsx
+      ├── loading-spinner.tsx
+      └── success-message.tsx
+    layout/                       # Layout-related components
+      ├── app-sidebar.tsx
+      ├── navigation.tsx
+      └── breadcrumbs.tsx
+```
+
+### Component Classification Rules
+- **`ui/`**: Exclusively for shadcn/ui components - never create custom components here
+- **`[feature]/`**: Components specific to a feature (e.g., profile, team, game)
+- **`common/`**: Reusable components that can be used across multiple features
+- **`layout/`**: Components related to application layout and navigation
+
+### Import Patterns
+```typescript
+// shadcn/ui components
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+// Feature-specific components
+import { ProfileForm } from "@/components/profile/profile-form"
+import { StrengthCard } from "@/components/profile/strength-card"
+
+// Common components
+import { ErrorDisplay } from "@/components/common/error-display"
+import { LoadingSpinner } from "@/components/common/loading-spinner"
+
+// Layout components
+import { AppSidebar } from "@/components/layout/app-sidebar"
+```
+
+## 6. Files
 
 - **FILE-001**: `/src/app/dashboard/profile/page.tsx` - Main profile page with display/edit toggle
 - **FILE-002**: `/src/app/dashboard/profile/edit/page.tsx` - Dedicated profile editing page
-- **FILE-003**: `/src/components/ui/profile-form.tsx` - Main profile form component
-- **FILE-004**: `/src/components/ui/strengths-selector.tsx` - Strengths selection interface
-- **FILE-005**: `/src/components/ui/strength-card.tsx` - Individual strength card component
-- **FILE-006**: `/src/components/ui/domain-section.tsx` - Domain grouping component
-- **FILE-007**: `/src/components/ui/profile-display.tsx` - Profile viewing component
+- **FILE-003**: `/src/components/profile/profile-form.tsx` - Main profile form component
+- **FILE-004**: `/src/components/profile/strengths-selector.tsx` - Strengths selection interface
+- **FILE-005**: `/src/components/profile/strength-card.tsx` - Individual strength card component
+- **FILE-006**: `/src/components/profile/domain-section.tsx` - Domain grouping component
+- **FILE-007**: `/src/components/profile/profile-display.tsx` - Profile viewing component
 - **FILE-008**: `/src/lib/validations/profile.ts` - Zod validation schemas
 - **FILE-009**: `/src/actions/profile.ts` - Profile-related server actions
 - **FILE-010**: `/src/actions/strengths.ts` - Strength data fetching actions
 - **FILE-011**: `/src/middleware.ts` - Updated with profile completion checks
-- **FILE-012**: `/src/components/ui/navigation.tsx` - Updated with profile menu item
+- **FILE-012**: `/src/components/layout/navigation.tsx` - Updated with profile menu item
 
-## 6. Testing
+## 7. Testing
 
 - **TEST-001**: Unit tests for profile validation schemas with edge cases
 - **TEST-002**: Component tests for strengths selector with selection limits
@@ -175,7 +227,7 @@ This implementation plan covers the complete user profile management system (US-
 - **TEST-009**: Error handling tests for network failures and invalid data
 - **TEST-010**: Performance tests for form rendering with 20 strength options
 
-## 7. Risks & Assumptions
+## 8. Risks & Assumptions
 
 - **RISK-001**: User confusion with strength selection interface - Mitigation: Clear visual feedback and domain organization
 - **RISK-002**: Form performance with large dataset - Mitigation: Efficient rendering and memoization
@@ -187,7 +239,7 @@ This implementation plan covers the complete user profile management system (US-
 - **ASSUMPTION-004**: Domain organization helps users understand strength categories
 - **ASSUMPTION-005**: Edit functionality will be used primarily for minor updates
 
-## 8. Related Specifications / Further Reading
+## 9. Related Specifications / Further Reading
 
 - [High 5 Strengths Official Methodology](https://high5test.com/)
 - [React Hook Form Documentation](https://react-hook-form.com/)

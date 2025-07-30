@@ -3,168 +3,67 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { isProfileComplete, validateProfileData, type ProfileData } from "@/lib/validations/profile";
 import { revalidatePath } from "next/cache";
+import { 
+  ProfileFormDataSchema, 
+  isProfileComplete, 
+  type ActionResponse,
+  type ProfileFormData 
+} from "@/lib/validations/profile";
 
 /**
- * Update user profile with validation
+ * Submit profile form using React 19 useActionState pattern
+ * Following Lee Robinson's pattern from the video
  */
-export async function updateUserProfile(data: ProfileData) {
+export async function submitProfile(
+  prevState: ActionResponse | null, 
+  formData: FormData
+): Promise<ActionResponse> {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("No autorizado");
+    return {
+      success: false,
+      message: "No autorizado - Inicia sesión para continuar"
+    };
   }
 
   try {
-    // Validate input data
-    const validatedData = validateProfileData(data);
+    // Extract data from FormData
+    const rawData: Record<string, string> = {
+      age: formData.get('age') as string,
+      career: formData.get('career') as string,
+      hobbies: formData.get('hobbies') as string,
+      description: formData.get('description') as string,
+      strengthIds: formData.get('strengthIds') as string
+    };
 
-    // Start transaction to update user and user strengths
+    // Validate the form data using Zod
+    const validatedData = ProfileFormDataSchema.safeParse(rawData);
+
+    if (!validatedData.success) {
+      return {
+        success: false,
+        message: "Por favor corrige los errores en el formulario",
+        errors: validatedData.error.flatten().fieldErrors
+      };
+    }
+
+    const { age, career, hobbies, description, strengthIds } = validatedData.data;
+
+    // Start database transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update user basic information
       const updatedUser = await tx.user.update({
         where: { id: session.user.id },
         data: {
-          age: validatedData.age,
-          career: validatedData.career,
-          hobbies: validatedData.hobbies,
-          description: validatedData.description
+          age,
+          career,
+          hobbies,
+          description
         }
       });
 
-      // Delete existing user strengths
-      await tx.userStrength.deleteMany({
-        where: { userId: session.user.id }
-      });
-
-      // Create new user strengths
-      await tx.userStrength.createMany({
-        data: validatedData.strengthIds.map(strengthId => ({
-          userId: session.user.id!,
-          strengthId
-        }))
-      });
-
-      // Get updated user with relations to check completion
-      const userWithRelations = await tx.user.findUnique({
-        where: { id: session.user.id },
-        include: {
-          userStrengths: {
-            select: {
-              strengthId: true
-            }
-          }
-        }
-      });
-
-      if (!userWithRelations) {
-        throw new Error("Usuario no encontrado después de la actualización");
-      }
-
-      // Check if profile is now complete
-      const profileCompleteStatus = isProfileComplete(userWithRelations);
-
-      // Update profileComplete field if it has changed
-      if (userWithRelations.profileComplete !== profileCompleteStatus) {
-        await tx.user.update({
-          where: { id: session.user.id },
-          data: { profileComplete: profileCompleteStatus }
-        });
-      }
-
-      return {
-        ...updatedUser,
-        profileComplete: profileCompleteStatus
-      };
-    });
-
-    // Revalidate relevant paths
-    revalidatePath("/dashboard/profile");
-    revalidatePath("/dashboard");
-
-    return {
-      success: true,
-      message: "Perfil actualizado exitosamente",
-      profileComplete: result.profileComplete
-    };
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    
-    if (error instanceof Error) {
-      throw new Error(`Error al actualizar el perfil: ${error.message}`);
-    }
-    
-    throw new Error("Error desconocido al actualizar el perfil");
-  }
-}
-
-/**
- * Update specific profile field
- */
-export async function updateProfileField(field: string, value: string | number | undefined) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error("No autorizado");
-  }
-
-  try {
-    const updateData: Record<string, any> = {};
-    updateData[field] = value;
-
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: updateData,
-      include: {
-        userStrengths: {
-          select: {
-            strengthId: true
-          }
-        }
-      }
-    });
-
-    // Check if profile is complete after update
-    const profileCompleteStatus = isProfileComplete(updatedUser);
-
-    // Update profileComplete field if it has changed
-    if (updatedUser.profileComplete !== profileCompleteStatus) {
-      await prisma.user.update({
-        where: { id: session.user.id },
-        data: { profileComplete: profileCompleteStatus }
-      });
-    }
-
-    revalidatePath("/dashboard/profile");
-
-    return {
-      success: true,
-      message: "Campo actualizado exitosamente",
-      profileComplete: profileCompleteStatus
-    };
-  } catch (error) {
-    console.error("Error updating profile field:", error);
-    throw new Error("Error al actualizar el campo del perfil");
-  }
-}
-
-/**
- * Update user strengths only
- */
-export async function updateUserStrengths(strengthIds: string[]) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    throw new Error("No autorizado");
-  }
-
-  if (strengthIds.length !== 5) {
-    throw new Error("Debes seleccionar exactamente 5 fortalezas");
-  }
-
-  try {
-    const result = await prisma.$transaction(async (tx) => {
       // Delete existing user strengths
       await tx.userStrength.deleteMany({
         where: { userId: session.user.id }
@@ -178,14 +77,12 @@ export async function updateUserStrengths(strengthIds: string[]) {
         }))
       });
 
-      // Get updated user to check completion
+      // Get updated user with relations to check completion
       const userWithRelations = await tx.user.findUnique({
         where: { id: session.user.id },
         include: {
           userStrengths: {
-            select: {
-              strengthId: true
-            }
+            select: { strengthId: true }
           }
         }
       });
@@ -194,179 +91,49 @@ export async function updateUserStrengths(strengthIds: string[]) {
         throw new Error("Usuario no encontrado después de la actualización");
       }
 
-      // Check if profile is complete
+      // Check if profile is now complete
       const profileCompleteStatus = isProfileComplete(userWithRelations);
 
-      // Update profileComplete field if it has changed
-      if (userWithRelations.profileComplete !== profileCompleteStatus) {
-        await tx.user.update({
-          where: { id: session.user.id },
-          data: { profileComplete: profileCompleteStatus }
-        });
-      }
+      // Update profileComplete field
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: { profileComplete: profileCompleteStatus }
+      });
 
-      return profileCompleteStatus;
+      return {
+        updatedUser,
+        profileComplete: profileCompleteStatus
+      };
     });
 
+    // Revalidate relevant paths
     revalidatePath("/dashboard/profile");
+    revalidatePath("/dashboard");
 
     return {
       success: true,
-      message: "Fortalezas actualizadas exitosamente",
-      profileComplete: result
-    };
-  } catch (error) {
-    console.error("Error updating user strengths:", error);
-    throw new Error("Error al actualizar las fortalezas");
-  }
-}
-
-/**
- * Get the current user's profile with all related data
- */
-export async function getUserProfile() {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        team: {
-          select: {
-            id: true,
-            name: true,
-            description: true
-          }
-        },
-        userStrengths: {
-          include: {
-            strength: {
-              include: {
-                domain: {
-                  select: {
-                    id: true,
-                    name: true,
-                    description: true
-                  }
-                }
-              }
-            }
-          },
-          orderBy: {
-            createdAt: 'asc'
-          }
-        }
+      message: result.profileComplete 
+        ? "¡Perfil completado exitosamente! Redirigiendo al dashboard..." 
+        : "Perfil actualizado exitosamente",
+      data: {
+        profileComplete: result.profileComplete,
+        redirectTo: result.profileComplete ? "/dashboard" : undefined
       }
-    });
+    };
 
-    if (!user) {
-      throw new Error("Usuario no encontrado");
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    
+    if (error instanceof Error) {
+      return {
+        success: false,
+        message: `Error al actualizar el perfil: ${error.message}`
+      };
     }
-
-    // Calculate if profile is complete
-    const profileCompleteStatus = isProfileComplete(user);
-
+    
     return {
-      ...user,
-      profileComplete: profileCompleteStatus,
-      strengths: user.userStrengths.map(us => ({
-        id: us.strength.id,
-        name: us.strength.name,
-        description: us.strength.description,
-        domain: us.strength.domain
-      }))
+      success: false,
+      message: "Error inesperado al actualizar el perfil"
     };
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw new Error("Error al obtener el perfil del usuario");
-  }
-}
-
-/**
- * Get basic user profile information (lightweight version)
- */
-export async function getUserBasicProfile() {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return null;
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        age: true,
-        career: true,
-        hobbies: true,
-        description: true,
-        profileComplete: true,
-        teamId: true,
-        userStrengths: {
-          select: {
-            strengthId: true
-          }
-        }
-      }
-    });
-
-    if (!user) {
-      return null;
-    }
-
-    // Calculate actual profile completion status
-    const actualProfileComplete = isProfileComplete(user);
-
-    return {
-      ...user,
-      profileComplete: actualProfileComplete
-    };
-  } catch (error) {
-    console.error("Error fetching basic user profile:", error);
-    return null;
-  }
-}
-
-/**
- * Check if current user's profile is complete
- */
-export async function checkProfileComplete(): Promise<boolean> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return false;
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        age: true,
-        career: true,
-        hobbies: true,
-        description: true,
-        userStrengths: {
-          select: {
-            strengthId: true
-          }
-        }
-      }
-    });
-
-    if (!user) {
-      return false;
-    }
-
-    return isProfileComplete(user);
-  } catch (error) {
-    console.error("Error checking profile completion:", error);
-    return false;
   }
 }

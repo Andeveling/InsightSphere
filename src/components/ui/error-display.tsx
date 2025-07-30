@@ -2,7 +2,8 @@ import { AlertCircle, XCircle, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ErrorDisplayProps {
-  message: string
+  message?: string
+  errors?: string[]
   type?: 'error' | 'warning' | 'info'
   className?: string
   onDismiss?: () => void
@@ -10,6 +11,7 @@ interface ErrorDisplayProps {
 
 export function ErrorDisplay({ 
   message, 
+  errors,
   type = 'error', 
   className,
   onDismiss 
@@ -28,18 +30,37 @@ export function ErrorDisplay({
 
   const Icon = icons[type]
 
+  // Determine what to display
+  const displayErrors = errors || (message ? [message] : [])
+  
+  if (displayErrors.length === 0) {
+    return null
+  }
+
   return (
     <div 
       className={cn(
-        'flex items-center space-x-2 text-sm p-3 rounded-md border',
+        'flex items-start space-x-2 text-sm p-3 rounded-md border',
         styles[type],
         className
       )}
       role="alert"
       aria-live="polite"
     >
-      <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-      <p className="flex-1">{message}</p>
+      <Icon className="h-4 w-4 flex-shrink-0 mt-0.5" aria-hidden="true" />
+      <div className="flex-1">
+        {displayErrors.length === 1 ? (
+          <p>{displayErrors[0]}</p>
+        ) : (
+          <ul className="space-y-1">
+            {displayErrors.map((error, index) => (
+              <li key={index} className="list-disc list-inside">
+                {error}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {onDismiss && (
         <button
           onClick={onDismiss}
