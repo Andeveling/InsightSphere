@@ -127,3 +127,8 @@ include: {
 - Credentials provider needs both `credentials` config and `authorize` function
 - Database seed data is in Spanish - maintain language consistency
 - Always include domain relations when querying strengths
+
+### Change logging
+- Each time you generate code, note the changes in the `CHANGELOG.md` file.
+- Follow semantic versioning guidelines.
+- Include date and description of changes.
