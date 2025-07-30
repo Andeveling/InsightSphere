@@ -36,19 +36,14 @@ export default async function ProfilePage() {
     orderBy: { name: 'asc' }
   });
 
-  const breadcrumbItems = [
-    { label: "Perfil", current: true }
-  ];
-
   return (
-    <div className="space-y-8">
+    <>
       <PageHeader
         title="Mi Perfil"
         description="Gestiona tu información personal y selecciona tus fortalezas principales."
-        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
       />
 
       <ProfileForm user={user} domains={domains} />
-    </div>
+    </>
   );
 }
