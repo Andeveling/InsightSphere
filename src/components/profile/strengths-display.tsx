@@ -127,7 +127,7 @@ export function StrengthsDisplay({ user, className }: StrengthsDisplayProps) {
                       {strength.domain.name}
                     </Badge>
                     <h4 className="font-semibold text-lg text-foreground">
-                      {strength.name}
+                      {strength.name} / {strength.nameEs}
                     </h4>
                   </div>
                   

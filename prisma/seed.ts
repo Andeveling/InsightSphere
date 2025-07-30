@@ -26,32 +26,32 @@ const domainsData = [
 // Clasificación correcta oficial HIGH5 - 20 fortalezas, 4 dominios
 const strengthsData = [
   // DOING DOMAIN (5 fortalezas)
-  { name: "Deliverer", domain: "Doing", description: "Cumplen con sus compromisos y disfrutan viendo cómo esto genera más confianza y respeto entre los demás. Se sienten fatal si las promesas se rompen, tanto al recibirlas como al darlas." },
-  { name: "Focus Expert", domain: "Doing", description: "Las personas con esta fortaleza son expertas en establecer y mantener la concentración en una dirección u objetivo específico, evitando distracciones para lograr resultados." },
-  { name: "Problem Solver", domain: "Doing", description: "Les encanta encontrar errores, descubrir fallas, diagnosticar problemas y encontrar soluciones. Les resulta difícil barrer los problemas debajo de la alfombra y seguir adelante ignorando los problemas sin resolver." },
-  { name: "Time Keeper", domain: "Doing", description: "Son eficientes y puntuales, y se aseguran de que las cosas se hagan a tiempo. Valoran la puntualidad y la gestión eficaz del tiempo para cumplir con los plazos y los objetivos." },
-  { name: "Analyst", domain: "Doing", description: "Las personas con esta fortaleza se sienten energizadas al buscar la simplicidad y la claridad a través de una gran cantidad de datos. Se frustran cuando se les pide que sigan su corazón en lugar de la lógica y los hechos probados." },
+  { name: "Deliverer", nameEs: "Cumplidor", domain: "Doing", description: "Cumplen con sus compromisos y disfrutan viendo cómo esto genera más confianza y respeto entre los demás. Se sienten fatal si las promesas se rompen, tanto al recibirlas como al darlas." },
+  { name: "Focus Expert", nameEs: "Experto en Enfoque", domain: "Doing", description: "Las personas con esta fortaleza son expertas en establecer y mantener la concentración en una dirección u objetivo específico, evitando distracciones para lograr resultados." },
+  { name: "Problem Solver", nameEs: "Solucionador de Problemas", domain: "Doing", description: "Les encanta encontrar errores, descubrir fallas, diagnosticar problemas y encontrar soluciones. Les resulta difícil barrer los problemas debajo de la alfombra y seguir adelante ignorando los problemas sin resolver." },
+  { name: "Time Keeper", nameEs: "Guardián del Tiempo", domain: "Doing", description: "Son eficientes y puntuales, y se aseguran de que las cosas se hagan a tiempo. Valoran la puntualidad y la gestión eficaz del tiempo para cumplir con los plazos y los objetivos." },
+  { name: "Analyst", nameEs: "Analista", domain: "Doing", description: "Las personas con esta fortaleza se sienten energizadas al buscar la simplicidad y la claridad a través de una gran cantidad de datos. Se frustran cuando se les pide que sigan su corazón en lugar de la lógica y los hechos probados." },
 
   // FEELING DOMAIN (5 fortalezas)
-  { name: "Believer", domain: "Feeling", description: "Las acciones de estas personas están impulsadas por valores fundamentales y superiores que no pueden comprometerse a expensas del éxito. Se sienten agotados si sus creencias y valores son cuestionados o no están alineados con lo que tienen que hacer." },
-  { name: "Chameleon", domain: "Feeling", description: "Obtienen entusiasmo de los entornos en constante cambio, las sorpresas, los desvíos inesperados y el trabajo 'sobre la marcha'. La previsibilidad y la rutina les aburren hasta las lágrimas." },
-  { name: "Coach", domain: "Feeling", description: "Disfrutan descubriendo el potencial de otras personas y apoyando su crecimiento personal. Les resulta difícil aceptar que este potencial se desperdicie." },
-  { name: "Empathizer", domain: "Feeling", description: "Son excelentes para darse cuenta de cómo se sienten los demás y utilizar esta comprensión para hacer algo bueno. Se frustran cuando se les pide que ignoren los sentimientos y las emociones y que sigan una lógica estricta." },
-  { name: "Optimist", domain: "Feeling", description: "Su misión es aportar un espíritu positivo. Creen que el vaso está medio lleno en lugar de medio vacío. Siempre encuentran la manera de hacer las cosas más emocionantes, ya sea un proyecto de trabajo o una situación cotidiana." },
+  { name: "Believer", nameEs: "Creyente", domain: "Feeling", description: "Las acciones de estas personas están impulsadas por valores fundamentales y superiores que no pueden comprometerse a expensas del éxito. Se sienten agotados si sus creencias y valores son cuestionados o no están alineados con lo que tienen que hacer." },
+  { name: "Chameleon", nameEs: "Camaleón", domain: "Feeling", description: "Obtienen entusiasmo de los entornos en constante cambio, las sorpresas, los desvíos inesperados y el trabajo 'sobre la marcha'. La previsibilidad y la rutina les aburren hasta las lágrimas." },
+  { name: "Coach", nameEs: "Entrenador", domain: "Feeling", description: "Disfrutan descubriendo el potencial de otras personas y apoyando su crecimiento personal. Les resulta difícil aceptar que este potencial se desperdicie." },
+  { name: "Empathizer", nameEs: "Empatizador", domain: "Feeling", description: "Son excelentes para darse cuenta de cómo se sienten los demás y utilizar esta comprensión para hacer algo bueno. Se frustran cuando se les pide que ignoren los sentimientos y las emociones y que sigan una lógica estricta." },
+  { name: "Optimist", nameEs: "Optimista", domain: "Feeling", description: "Su misión es aportar un espíritu positivo. Creen que el vaso está medio lleno en lugar de medio vacío. Siempre encuentran la manera de hacer las cosas más emocionantes, ya sea un proyecto de trabajo o una situación cotidiana." },
 
   // MOTIVATING DOMAIN (5 fortalezas)
-  { name: "Catalyst", domain: "Motivating", description: "Disfrutan de poner las cosas en marcha y de crear un impulso en un entorno estancado. No soportan esperar y perder el tiempo cuando podrían estar haciendo que las cosas despeguen." },
-  { name: "Commander", domain: "Motivating", description: "Les encanta estar a cargo, hablar y que se les pida una opinión directa. No evitan los conflictos y no pueden entender la mentalidad de 'andarse con rodeos'." },
-  { name: "Self-believer", domain: "Motivating", description: "Son personas independientes y autosuficientes, que inspiran a otros con su certeza y confianza. No soportan que otros les digan qué hacer o controlen sus acciones." },
-  { name: "Storyteller", domain: "Motivating", description: "Son maestros de la comunicación. Les gusta ser anfitriones, hablar en público y ser escuchados. Utilizan las historias para conectar, inspirar e influir en los demás." },
-  { name: "Winner", domain: "Motivating", description: "Su objetivo es competir con otros para ganar. En su mente, solo los perdedores creen que participar es más importante que ganar. Las competiciones se crean para seleccionar a un único ganador porque, al final, los resultados son una comparación medida con los demás." },
+  { name: "Catalyst", nameEs: "Catalizador", domain: "Motivating", description: "Disfrutan de poner las cosas en marcha y de crear un impulso en un entorno estancado. No soportan esperar y perder el tiempo cuando podrían estar haciendo que las cosas despeguen." },
+  { name: "Commander", nameEs: "Comandante", domain: "Motivating", description: "Les encanta estar a cargo, hablar y que se les pida una opinión directa. No evitan los conflictos y no pueden entender la mentalidad de 'andarse con rodeos'." },
+  { name: "Self-believer", nameEs: "Autoconfiante", domain: "Motivating", description: "Son personas independientes y autosuficientes, que inspiran a otros con su certeza y confianza. No soportan que otros les digan qué hacer o controlen sus acciones." },
+  { name: "Storyteller", nameEs: "Narrador", domain: "Motivating", description: "Son maestros de la comunicación. Les gusta ser anfitriones, hablar en público y ser escuchados. Utilizan las historias para conectar, inspirar e influir en los demás." },
+  { name: "Winner", nameEs: "Ganador", domain: "Motivating", description: "Su objetivo es competir con otros para ganar. En su mente, solo los perdedores creen que participar es más importante que ganar. Las competiciones se crean para seleccionar a un único ganador porque, al final, los resultados son una comparación medida con los demás." },
 
   // THINKING DOMAIN (5 fortalezas)
-  { name: "Brainstormer", domain: "Thinking", description: "Estas personas se emocionan cuando se les pide que presenten nuevas ideas sin límites y que conecten cosas aparentemente inconexas. Se aburren rápidamente con las prácticas estándar o las personas de mente cerrada." },
-  { name: "Philomath", domain: "Thinking", description: "Les encanta aprender, adquirir conocimientos y buscar la verdad. Sienten una profunda curiosidad y un deseo de entender el mundo que les rodea." },
-  { name: "Strategist", domain: "Thinking", description: "Son capaces de ver el panorama general y de identificar patrones donde otros ven complejidad. Disfrutan creando planes y estrategias para navegar hacia un futuro deseado." },
-  { name: "Thinker", domain: "Thinking", description: "Su objetivo es pensar. A algunos les emociona ejercitar sus bíceps y tríceps, pero ellos prefieren estirar sus 'músculos cerebrales' a través del pensamiento profundo. Disfrutan de la actividad mental y de las conversaciones significativas." },
-  { name: "Peace Keeper", domain: "Thinking", description: "Buscan la armonía y la resolución pacífica de conflictos. Se esfuerzan por encontrar un terreno común y unir a las personas, creando un ambiente de colaboración y entendimiento." }
+  { name: "Brainstormer", nameEs: "Generador de Ideas", domain: "Thinking", description: "Estas personas se emocionan cuando se les pide que presenten nuevas ideas sin límites y que conecten cosas aparentemente inconexas. Se aburren rápidamente con las prácticas estándar o las personas de mente cerrada." },
+  { name: "Philomath", nameEs: "Filomato", domain: "Thinking", description: "Les encanta aprender, adquirir conocimientos y buscar la verdad. Sienten una profunda curiosidad y un deseo de entender el mundo que les rodea." },
+  { name: "Strategist", nameEs: "Estratega", domain: "Thinking", description: "Son capaces de ver el panorama general y de identificar patrones donde otros ven complejidad. Disfrutan creando planes y estrategias para navegar hacia un futuro deseado." },
+  { name: "Thinker", nameEs: "Pensador", domain: "Thinking", description: "Su objetivo es pensar. A algunos les emociona ejercitar sus bíceps y tríceps, pero ellos prefieren estirar sus 'músculos cerebrales' a través del pensamiento profundo. Disfrutan de la actividad mental y de las conversaciones significativas." },
+  { name: "Peace Keeper", nameEs: "Pacificador", domain: "Thinking", description: "Buscan la armonía y la resolución pacífica de conflictos. Se esfuerzan por encontrar un terreno común y unir a las personas, creando un ambiente de colaboración y entendimiento." }
 ]
 
 // Datos de equipos de ejemplo
@@ -213,10 +213,10 @@ async function main() {
       if (!domain) {
         throw new Error(`Domain ${strength.domain} not found`)
       }
-      
       return await prisma.strength.create({
         data: {
           name: strength.name,
+          nameEs: strength.nameEs,
           description: strength.description,
           domainId: domain.id
         }

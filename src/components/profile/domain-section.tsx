@@ -13,6 +13,7 @@ interface Domain {
 interface Strength {
   id: string;
   name: string;
+  nameEs?: string; // Added nameEs optional field
   description: string;
   domain: Domain;
 }
@@ -120,7 +121,7 @@ export function DomainSection({
                 <StrengthCard
                   key={strength.id}
                   id={strength.id}
-                  name={strength.name}
+                  name={`${strength.name} / ${strength.nameEs ?? ''}`.trim()}
                   description={strength.description}
                   domain={strength.domain}
                   isSelected={isSelected}

@@ -192,7 +192,7 @@ export function StrengthRankingSelector({
                                   <DomainIcon className="w-4 h-4 text-white" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="font-medium">{strength.name}</div>
+                                  <div className="font-medium">{strength.name} / {strength.nameEs}</div>
                                   <div className="text-xs text-muted-foreground">{strength.domain.name}</div>
                                 </div>
                               </div>
@@ -235,7 +235,7 @@ export function StrengthRankingSelector({
                       <div key={index} className="flex items-center gap-3 text-green-800 dark:text-green-200">
                         <RankIcon className="w-5 h-5 text-yellow-600" />
                         <span className="font-medium">{index + 1}.</span>
-                        <span className="font-medium">{strengthData.strength.name}</span>
+                        <span className="font-medium">{strengthData.strength.name} / {strengthData.strength.nameEs}</span>
                         <Badge className={cn(domainInfo.color, "text-white text-xs")}>
                           {strengthData.domain.name}
                         </Badge>

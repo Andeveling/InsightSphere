@@ -16,6 +16,7 @@ interface StrengthsSelectorProps {
     strengths: Array<{
       id: string;
       name: string;
+      nameEs?: string;
       description: string;
       domainId: string;
     }>;
@@ -247,7 +248,7 @@ export function StrengthsSelector({
                     variant="secondary"
                     className={cn("font-medium", badgeColorClass)}
                   >
-                    {strength.name}
+                    {strength.name} / {strength.nameEs}
                   </Badge>
                 );
               })}

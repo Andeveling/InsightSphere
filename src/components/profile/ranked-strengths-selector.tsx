@@ -135,7 +135,7 @@ export function RankedStrengthsSelector({
                   {strength ? (
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm leading-tight">
-                        {strength.name}
+                        {strength.name} / {strength.nameEs}
                       </h4>
                       <Badge 
                         variant="outline" 
@@ -215,7 +215,7 @@ export function RankedStrengthsSelector({
                     
                     <div className="space-y-1 w-full">
                       <h5 className="font-medium text-sm leading-tight">
-                        {strength.name}
+                        {strength.name} / {strength.nameEs}
                       </h5>
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {strength.description}
