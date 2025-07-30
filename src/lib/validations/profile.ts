@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Base schemas for reusability
 const ageSchema = z
-  .number()
+  .coerce.number()
   .int()
   .min(16, "La edad mínima es 16 años")
   .max(99, "La edad máxima es 99 años");

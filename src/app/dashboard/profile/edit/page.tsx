@@ -51,7 +51,6 @@ export default async function ProfileEditPage() {
       <PageHeader
         title="Editar Perfil"
         description="Gestiona tu información personal y selecciona tus TOP 5 fortalezas."
-        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
       >
         <Button variant="outline" asChild>
           <Link href="/dashboard/profile/view">

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Trophy, Medal, Award } from "lucide-react";
+import { Trophy, Medal, Award, Target, Star, Brain, Heart, Zap, Cog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Domain, Strength } from "@prisma/client";
 
@@ -18,29 +18,40 @@ interface StrengthRankingSelectorProps {
   name: string;
 }
 
-// Domain color mappings
-const domainColors = {
-  "Doing": "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800",
-  "Feeling": "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800", 
-  "Motivating": "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800",
-  "Thinking": "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-800"
+// Domain color mappings with icons
+const domainConfig = {
+  "Doing": {
+    color: "bg-blue-500",
+    lightColor: "bg-blue-100 dark:bg-blue-900/20",
+    textColor: "text-blue-700 dark:text-blue-300",
+    borderColor: "border-blue-200 dark:border-blue-800",
+    icon: Cog,
+  },
+  "Feeling": {
+    color: "bg-pink-500", 
+    lightColor: "bg-pink-100 dark:bg-pink-900/20",
+    textColor: "text-pink-700 dark:text-pink-300",
+    borderColor: "border-pink-200 dark:border-pink-800",
+    icon: Heart,
+  },
+  "Motivating": {
+    color: "bg-orange-500",
+    lightColor: "bg-orange-100 dark:bg-orange-900/20", 
+    textColor: "text-orange-700 dark:text-orange-300",
+    borderColor: "border-orange-200 dark:border-orange-800",
+    icon: Zap,
+  },
+  "Thinking": {
+    color: "bg-purple-500",
+    lightColor: "bg-purple-100 dark:bg-purple-900/20",
+    textColor: "text-purple-700 dark:text-purple-300", 
+    borderColor: "border-purple-200 dark:border-purple-800",
+    icon: Brain,
+  }
 };
 
-const positionIcons = {
-  1: Trophy,
-  2: Medal,
-  3: Award,
-  4: Award,
-  5: Award
-};
-
-const positionLabels = {
-  1: "1ra Fortaleza",
-  2: "2da Fortaleza", 
-  3: "3ra Fortaleza",
-  4: "4ta Fortaleza",
-  5: "5ta Fortaleza"
-};
+const rankIcons = [Trophy, Medal, Award, Target, Star];
+const rankLabels = ["1ra Fortaleza", "2da Fortaleza", "3ra Fortaleza", "4ta Fortaleza", "5ta Fortaleza"];
 
 export function StrengthRankingSelector({
   domains,
@@ -49,70 +60,22 @@ export function StrengthRankingSelector({
   disabled,
   name
 }: StrengthRankingSelectorProps) {
-  const [rankings, setRankings] = useState<{ strengthId: string; position: number }[]>(selectedRankings);
+  // Convert rankings format to positions array for easier handling
+  const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>([null, null, null, null, null]);
 
+  // Initialize from selectedRankings
   useEffect(() => {
-    setRankings(selectedRankings);
+    const positions: (string | null)[] = [null, null, null, null, null];
+    selectedRankings.forEach(ranking => {
+      if (ranking.position >= 1 && ranking.position <= 5) {
+        positions[ranking.position - 1] = ranking.strengthId;
+      }
+    });
+    setSelectedStrengths(positions);
   }, [selectedRankings]);
 
-  const handleStrengthSelect = (strengthId: string) => {
-    if (disabled) return;
-
-    const existingRanking = rankings.find(r => r.strengthId === strengthId);
-    
-    if (existingRanking) {
-      // Remove existing ranking
-      const newRankings = rankings.filter(r => r.strengthId !== strengthId);
-      setRankings(newRankings);
-      onChange(newRankings);
-    } else if (rankings.length < 5) {
-      // Add new ranking with next available position
-      const nextPosition = getNextAvailablePosition();
-      const newRankings = [...rankings, { strengthId, position: nextPosition }];
-      setRankings(newRankings);
-      onChange(newRankings);
-    }
-  };
-
-  const handlePositionChange = (strengthId: string, newPosition: number) => {
-    if (disabled) return;
-
-    const currentRankings = [...rankings];
-    const currentIndex = currentRankings.findIndex(r => r.strengthId === strengthId);
-    const targetIndex = currentRankings.findIndex(r => r.position === newPosition);
-
-    if (currentIndex === -1) return;
-
-    if (targetIndex !== -1) {
-      // Swap positions
-      const currentPosition = currentRankings[currentIndex].position;
-      currentRankings[targetIndex].position = currentPosition;
-      currentRankings[currentIndex].position = newPosition;
-    } else {
-      // Just update position
-      currentRankings[currentIndex].position = newPosition;
-    }
-
-    setRankings(currentRankings);
-    onChange(currentRankings);
-  };
-
-  const removeRanking = (strengthId: string) => {
-    if (disabled) return;
-    
-    const newRankings = rankings.filter(r => r.strengthId !== strengthId);
-    setRankings(newRankings);
-    onChange(newRankings);
-  };
-
-  const getNextAvailablePosition = (): number => {
-    const usedPositions = rankings.map(r => r.position);
-    for (let i = 1; i <= 5; i++) {
-      if (!usedPositions.includes(i)) {
-        return i;
-      }
-    }
-    return 1;
+  const getDomainConfig = (domainName: string) => {
+    return domainConfig[domainName as keyof typeof domainConfig] || domainConfig.Doing;
   };
 
   const getStrengthById = (strengthId: string) => {
@@ -125,171 +88,214 @@ export function StrengthRankingSelector({
     return null;
   };
 
-  const isStrengthSelected = (strengthId: string) => {
-    return rankings.some(r => r.strengthId === strengthId);
+  const handleStrengthSelect = (position: number, strengthId: string) => {
+    if (disabled) return;
+
+    const newSelected = [...selectedStrengths];
+
+    // Si la fortaleza ya está seleccionada en otra posición, la removemos
+    const existingIndex = newSelected.indexOf(strengthId);
+    if (existingIndex !== -1) {
+      newSelected[existingIndex] = null;
+    }
+
+    newSelected[position] = strengthId;
+    setSelectedStrengths(newSelected);
+
+    // Convert back to rankings format
+    const newRankings = newSelected
+      .map((strengthId, index) => strengthId ? { strengthId, position: index + 1 } : null)
+      .filter(Boolean) as { strengthId: string; position: number }[];
+    
+    onChange(newRankings);
   };
 
-  const getRankingPosition = (strengthId: string) => {
-    const ranking = rankings.find(r => r.strengthId === strengthId);
-    return ranking?.position;
+  const getAvailableStrengths = (currentPosition: number) => {
+    const currentSelection = selectedStrengths[currentPosition];
+    const allStrengths: (Strength & { domain: Domain })[] = [];
+    
+    domains.forEach(domain => {
+      domain.strengths.forEach(strength => {
+        allStrengths.push({ ...strength, domain });
+      });
+    });
+
+    return allStrengths.filter(
+      (strength) => !selectedStrengths.includes(strength.id) || strength.id === currentSelection
+    );
   };
 
-  // Sort rankings by position for display
-  const sortedRankings = [...rankings].sort((a, b) => a.position - b.position);
+  const selectedCount = selectedStrengths.filter((s) => s !== null).length;
 
   return (
     <div className="space-y-6">
-      {/* Selected Rankings Display */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-yellow-600" />
-            Tus TOP 5 Fortalezas
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-600" />
+            Selecciona tus TOP 5 Fortalezas
           </CardTitle>
-          <CardDescription>
-            Selecciona exactamente 5 fortalezas y ordénalas por prioridad (1-5)
-          </CardDescription>
+          <p className="text-muted-foreground">
+            Elige exactamente 5 fortalezas que mejor te representen y ordénalas por prioridad (1-5).
+          </p>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map(position => {
-              const ranking = sortedRankings.find(r => r.position === position);
-              const strengthData = ranking ? getStrengthById(ranking.strengthId) : null;
-              const IconComponent = positionIcons[position as keyof typeof positionIcons];
+
+        <CardContent className="space-y-6">
+          <div className="text-center">
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {selectedCount}/5 fortalezas seleccionadas
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            {selectedStrengths.map((selectedStrengthId, index) => {
+              const RankIcon = rankIcons[index];
+              const availableStrengths = getAvailableStrengths(index);
+              const strengthData = selectedStrengthId ? getStrengthById(selectedStrengthId) : null;
+              const domainInfo = strengthData ? getDomainConfig(strengthData.domain.name) : null;
 
               return (
-                <div key={position} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
-                  <div className="flex items-center gap-2 min-w-[140px]">
-                    <IconComponent className={cn(
-                      "h-5 w-5",
-                      position === 1 ? "text-yellow-600" : position === 2 ? "text-gray-500" : "text-orange-600"
-                    )} />
-                    <span className="font-medium text-sm">
-                      {positionLabels[position as keyof typeof positionLabels]}
-                    </span>
+                <div key={index} className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
+                  <div className="flex items-center gap-3 min-w-[140px]">
+                    <RankIcon 
+                      className={cn(
+                        "h-6 w-6",
+                        index === 0 ? "text-yellow-600" : 
+                        index === 1 ? "text-gray-500" : 
+                        "text-orange-600"
+                      )} 
+                    />
+                    <span className="font-medium">{rankLabels[index]}</span>
                   </div>
-                  
-                  {strengthData ? (
-                    <div className="flex items-center gap-2 flex-1">
-                      <Badge 
-                        variant="outline"
-                        className={cn(
-                          "text-xs",
-                          domainColors[strengthData.domain.name as keyof typeof domainColors]
-                        )}
-                      >
+
+                  <div className="flex-1">
+                    <Select
+                      value={selectedStrengthId || ""}
+                      onValueChange={(value) => handleStrengthSelect(index, value)}
+                      disabled={disabled}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecciona una fortaleza..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableStrengths.map((strength) => {
+                          const domainConfig = getDomainConfig(strength.domain.name);
+                          const DomainIcon = domainConfig.icon;
+
+                          return (
+                            <SelectItem
+                              key={strength.id}
+                              value={strength.id}
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div className={cn("p-1 rounded", domainConfig.color)}>
+                                  <DomainIcon className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="font-medium">{strength.name}</div>
+                                  <div className="text-xs text-muted-foreground">{strength.domain.name}</div>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {strengthData && domainInfo && (
+                    <div className="flex items-center gap-2">
+                      <Badge className={cn(domainInfo.color, "text-white")}>
                         {strengthData.domain.name}
                       </Badge>
-                      <span className="font-medium">{strengthData.strength.name}</span>
-                      <p className="text-sm text-muted-foreground truncate flex-1">
-                        {strengthData.strength.description}
-                      </p>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => ranking && removeRanking(ranking.strengthId)}
-                        disabled={disabled}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex-1 text-muted-foreground text-sm italic">
-                      Selecciona una fortaleza...
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
-          
-          <div className="mt-4 text-sm text-muted-foreground">
-            {rankings.length}/5 fortalezas seleccionadas
+
+          {selectedCount === 5 && (
+            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+              <CardContent className="p-4">
+                <h3 className="text-green-800 dark:text-green-200 font-bold text-lg mb-3 flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  ¡Perfecto! Has seleccionado tus TOP 5 Fortalezas
+                </h3>
+                <div className="space-y-2">
+                  {selectedStrengths.map((strengthId, index) => {
+                    if (!strengthId) return null;
+                    const strengthData = getStrengthById(strengthId);
+                    if (!strengthData) return null;
+
+                    const domainInfo = getDomainConfig(strengthData.domain.name);
+                    const RankIcon = rankIcons[index];
+
+                    return (
+                      <div key={index} className="flex items-center gap-3 text-green-800 dark:text-green-200">
+                        <RankIcon className="w-5 h-5 text-yellow-600" />
+                        <span className="font-medium">{index + 1}.</span>
+                        <span className="font-medium">{strengthData.strength.name}</span>
+                        <Badge className={cn(domainInfo.color, "text-white text-xs")}>
+                          {strengthData.domain.name}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Domain Information Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+            {domains.map((domain) => {
+              const config = getDomainConfig(domain.name);
+              const DomainIcon = config.icon;
+              
+              return (
+                <Card key={domain.id} className="bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={cn("p-2 rounded", config.color)}>
+                        <DomainIcon className="w-5 h-5 text-white" />
+                      </div>
+                      <h4 className="font-bold">{domain.name}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {domain.description}
+                    </p>
+                    <div className="mt-2">
+                      <Badge variant="outline" className={cn(config.textColor, config.borderColor, "text-xs")}>
+                        {domain.strengths.length} fortalezas
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
 
-      {/* Strength Selection by Domain */}
-      <div className="space-y-4">
-        <h4 className="font-semibold text-lg">Selecciona tus Fortalezas</h4>
-        <p className="text-sm text-muted-foreground">
-          Haz clic en una fortaleza para agregarla a tu TOP 5. Puedes cambiar el orden después.
-        </p>
-        
-        {domains.map((domain) => (
-          <Card key={domain.id}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <Badge 
-                  className={cn(
-                    "px-3 py-1",
-                    domainColors[domain.name as keyof typeof domainColors]
-                  )}
-                >
-                  {domain.name}
-                </Badge>
-                <CardTitle className="text-lg">{domain.description}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {domain.strengths.map((strength) => {
-                  const isSelected = isStrengthSelected(strength.id);
-                  const position = getRankingPosition(strength.id);
-                  const canSelect = !isSelected && rankings.length < 5;
-
-                  return (
-                    <Button
-                      key={strength.id}
-                      type="button"
-                      variant={isSelected ? "default" : "outline"}
-                      className={cn(
-                        "h-auto p-4 justify-start text-left relative",
-                        !canSelect && !isSelected && "opacity-50 cursor-not-allowed",
-                        isSelected && "ring-2 ring-primary ring-offset-2"
-                      )}
-                      onClick={() => handleStrengthSelect(strength.id)}
-                      disabled={disabled || (!canSelect && !isSelected)}
-                    >
-                      <div className="flex flex-col gap-1 w-full">
-                        <div className="flex items-center justify-between w-full">
-                          <span className="font-medium">{strength.name}</span>
-                          {isSelected && position && (
-                            <Badge variant="secondary" className="text-xs">
-                              #{position}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {strength.description}
-                        </p>
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Hidden inputs for form submission */}
-      {rankings.map((ranking, index) => (
-        <div key={ranking.strengthId}>
-          <input
-            type="hidden"
-            name={`${name}[${index}].strengthId`}
-            value={ranking.strengthId}
-          />
-          <input
-            type="hidden"
-            name={`${name}[${index}].position`}
-            value={ranking.position}
-          />
-        </div>
-      ))}
+      {selectedStrengths.map((strengthId, index) => {
+        if (!strengthId) return null;
+        return (
+          <div key={strengthId}>
+            <input
+              type="hidden"
+              name={`${name}[${index}].strengthId`}
+              value={strengthId}
+            />
+            <input
+              type="hidden"
+              name={`${name}[${index}].position`}
+              value={index + 1}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

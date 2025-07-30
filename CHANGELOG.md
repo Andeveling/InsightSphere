@@ -65,3 +65,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Files Modified
 - `/src/components/app-sidebar.tsx` - Added profile menu item
 - `/middleware.ts` - Enhanced with profile completion logic
+
+## [0.3.0] - 2025-07-30
+
+### Added
+- **Strength Ranking System**: Complete TOP 5 strength selection with priority ranking (1-5)
+  - New `position` field in `UserStrength` model for ranking strengths
+  - `StrengthRankingSelector` component with visual ranking interface
+  - Trophy, medal, and award icons for position indicators
+  - Interactive strength selection with real-time ranking updates
+
+- **Enhanced Profile Management**: Improved user profile system with better UX
+  - Separate view and edit modes for profiles (`/dashboard/profile/view` and `/dashboard/profile/edit`)
+  - `StrengthsDisplay` component for beautiful strength visualization
+  - Professional profile layout with personal information cards
+  - Profile completion status tracking and notifications
+
+- **Improved Layout System**: Consistent spacing and design across dashboard
+  - `PageContainer` component for responsive layouts with configurable max-widths
+  - `PageHeader` component with breadcrumbs support and action buttons
+  - `Breadcrumbs` component with home navigation and proper hierarchy
+  - Enhanced dashboard layout with sticky header and backdrop blur effect
+
+- **Database Migration**: Schema updates for strength ranking
+  - Added `position` field to `UserStrength` model (nullable for backward compatibility)
+  - Unique constraints for user-position combinations (prevents duplicate rankings)
+  - Database migration applied successfully with existing data preservation
+
+### Enhanced
+- **Form Validation**: Advanced Zod schemas supporting both old and new strength formats
+- **Server Actions**: Updated to handle strength rankings with proper validation and error handling
+- **Type Safety**: Comprehensive TypeScript interfaces for all new components and data structures
+- **UI Components**: Enhanced cards, badges, and interactive elements with domain-specific colors
+- **Navigation**: Updated sidebar links and breadcrumb navigation for better UX
+
+### Technical
+- Database migration `add-position-ranking-to-user-strengths` applied successfully
+- React 19 useActionState pattern implementation for form handling
+- Comprehensive error handling and validation throughout the application
+- Responsive design improvements with mobile-first approach
+- Performance optimizations and component architecture improvements
