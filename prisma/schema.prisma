@@ -26,6 +26,13 @@ model Strength {
   name         String         @unique
   nameEs       String?        
   description  String
+  briefDefinition String?
+  fullDefinition String?
+  howToUseMoreEffectively String?
+  watchOuts String?
+  strengthsDynamics String?
+  bestPartners Json?
+  careerApplications Json?
   domainId     String
   domain       Domain         @relation(fields: [domainId], references: [id], onDelete: Cascade)
   userStrengths UserStrength[]
