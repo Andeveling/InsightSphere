@@ -68,11 +68,13 @@ model UserStrength {
   id         String   @id @default(cuid())
   userId     String
   strengthId String
+  position   Int?     // Ranking position (1-5), null if not ranked yet
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   strength   Strength @relation(fields: [strengthId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 
   @@unique([userId, strengthId])
+  @@unique([userId, position]) // Ensure unique position per user
   @@map("user_strengths")
 }
 

@@ -25,6 +25,23 @@ const descriptionSchema = z
   .max(1000, "La descripción no puede exceder 1000 caracteres")
   .trim();
 
+// Schema for strength rankings
+const strengthRankingSchema = z.object({
+  strengthId: z.string().cuid("ID de fortaleza inválido"),
+  position: z.number().int().min(1).max(5)
+});
+
+const strengthRankingsSchema = z
+  .array(strengthRankingSchema)
+  .length(5, "Debes seleccionar exactamente 5 fortalezas")
+  .refine((rankings) => {
+    const positions = rankings.map(r => r.position);
+    const uniquePositions = new Set(positions);
+    return uniquePositions.size === 5 && 
+           positions.every(p => p >= 1 && p <= 5);
+  }, "Las posiciones deben ser únicas del 1 al 5");
+
+// Backward compatibility - keep old strengthIds for existing forms
 const strengthIdsSchema = z
   .array(z.string().cuid("ID de fortaleza inválido"))
   .length(5, "Debes seleccionar exactamente 5 fortalezas");
@@ -39,8 +56,22 @@ export const ProfileFormDataSchema = z.object({
   career: careerSchema,
   hobbies: hobbiesSchema,
   description: descriptionSchema,
+  // Support both old and new format
   strengthIds: z.string()
+    .optional()
     .transform((str) => {
+      if (!str) return [];
+      try {
+        const parsed = JSON.parse(str);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }),
+  strengthRankings: z.string()
+    .optional()
+    .transform((str) => {
+      if (!str) return [];
       try {
         const parsed = JSON.parse(str);
         return Array.isArray(parsed) ? parsed : [];
@@ -48,13 +79,23 @@ export const ProfileFormDataSchema = z.object({
         return [];
       }
     })
-    .pipe(z.array(z.string()).length(5, "Debes seleccionar exactamente 5 fortalezas"))
+}).refine((data) => {
+  // Validate that either strengthIds or strengthRankings are provided
+  const hasStrengthIds = data.strengthIds && data.strengthIds.length > 0;
+  const hasStrengthRankings = data.strengthRankings && data.strengthRankings.length > 0;
+  
+  return hasStrengthIds || hasStrengthRankings;
+}, {
+  message: "Debes seleccionar exactamente 5 fortalezas",
+  path: ["strengthIds"]
 }).transform(data => ({
   age: Number(data.age),
   career: data.career,
   hobbies: data.hobbies,
   description: data.description,
-  strengthIds: data.strengthIds
+  // Use rankings if available, otherwise fall back to strengthIds
+  strengthRankings: data.strengthRankings.length > 0 ? data.strengthRankings : undefined,
+  strengthIds: data.strengthIds.length > 0 ? data.strengthIds : undefined
 }));
 
 // Profile update schema (processed data)
@@ -63,7 +104,13 @@ export const ProfileUpdateSchema = z.object({
   career: careerSchema.optional(),
   hobbies: hobbiesSchema.optional(),
   description: descriptionSchema,
-  strengthIds: strengthIdsSchema
+  strengthIds: strengthIdsSchema.optional(),
+  strengthRankings: strengthRankingsSchema.optional()
+}).refine((data) => {
+  return data.strengthIds || data.strengthRankings;
+}, {
+  message: "Debes seleccionar exactamente 5 fortalezas",
+  path: ["strengthIds"]
 });
 
 // Profile display schema (from database)
@@ -81,6 +128,7 @@ export const ProfileDisplaySchema = z.object({
   userStrengths: z.array(z.object({
     id: z.string().cuid(),
     strengthId: z.string().cuid(),
+    position: z.number().int().min(1).max(5).nullable(),
     strength: z.object({
       id: z.string().cuid(),
       name: z.string(),
@@ -134,6 +182,13 @@ export type DomainWithStrengths = z.infer<typeof DomainWithStrengthsSchema>;
 export type ActionResponse = z.infer<typeof ActionResponseSchema>;
 
 // Additional utility types
+export type StrengthRanking = {
+  strengthId: string;
+  position: number;
+};
+
+export type StrengthRankings = StrengthRanking[];
+
 export type StrengthSelection = {
   strengthIds: string[];
 };
@@ -162,7 +217,7 @@ export function isProfileComplete(user: {
   career?: string | null;
   hobbies?: string | null;
   description?: string | null;
-  userStrengths?: Array<{ strengthId: string }>;
+  userStrengths?: Array<{ strengthId: string; position?: number | null }>;
 }): boolean {
   return !!(
     user.age &&
@@ -183,5 +238,6 @@ export const schemas = {
   career: careerSchema,
   hobbies: hobbiesSchema,
   description: descriptionSchema,
-  strengthIds: strengthIdsSchema
+  strengthIds: strengthIdsSchema,
+  strengthRankings: strengthRankingsSchema
 } as const;

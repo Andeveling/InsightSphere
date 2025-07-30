@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,15 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorDisplay } from "@/components/ui/error-display";
-import { StrengthsSelector } from "@/components/profile/strengths-selector";
+import { StrengthRankingSelector } from "@/components/profile/strength-ranking-selector";
 import { submitProfile } from "@/actions/profile";
 import { toast } from "sonner";
 import type { ActionResponse } from "@/lib/validations/profile";
-import type { User, Strength, Domain } from "@prisma/client";
+import type { User, Strength, Domain, UserStrength } from "@prisma/client";
 
 interface ProfileFormProps {
   user: User & {
-    userStrengths: { strengthId: string }[];
+    userStrengths: (UserStrength & {
+      strength: Strength;
+    })[];
   };
   domains: (Domain & {
     strengths: Strength[];
@@ -34,6 +36,24 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
   // React 19 useActionState hook following Lee Robinson's pattern
   const [state, formAction, isPending] = useActionState(submitProfile, initialState);
 
+  // State for strength rankings
+  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number }>>([]);
+
+  // Initialize strength rankings from user data
+  useEffect(() => {
+    if (user.userStrengths.length > 0) {
+      const rankings = user.userStrengths
+        .filter(us => us.position !== null)
+        .map(us => ({
+          strengthId: us.strengthId,
+          position: us.position!
+        }))
+        .sort((a, b) => a.position - b.position);
+      
+      setStrengthRankings(rankings);
+    }
+  }, [user.userStrengths]);
+
   // Handle success state and redirects
   useEffect(() => {
     if (state?.success) {
@@ -49,9 +69,6 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
       toast.error(state.message);
     }
   }, [state, router]);
-
-  // Get user's current selected strength IDs
-  const selectedStrengthIds = user.userStrengths.map(us => us.strengthId);
 
   return (
     <Card>
@@ -134,19 +151,23 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
           {/* Strengths Selection Section */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Selecciona tus 5 Fortalezas</h3>
+              <h3 className="text-lg font-semibold">Selecciona tus TOP 5 Fortalezas</h3>
               <p className="text-sm text-muted-foreground">
-                Elige exactamente 5 fortalezas que mejor te representen de las 20 disponibles.
+                Elige exactamente 5 fortalezas que mejor te representen y ordénalas por prioridad (1-5).
               </p>
             </div>
 
-            <StrengthsSelector
+            <StrengthRankingSelector
               domains={domains}
-              selectedIds={selectedStrengthIds}
+              selectedRankings={strengthRankings}
+              onChange={setStrengthRankings}
               disabled={isPending}
-              name="strengthIds"
+              name="strengthRankings"
             />
             
+            {state?.errors?.strengthRankings && (
+              <ErrorDisplay errors={state.errors.strengthRankings} />
+            )}
             {state?.errors?.strengthIds && (
               <ErrorDisplay errors={state.errors.strengthIds} />
             )}

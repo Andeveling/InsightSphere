@@ -29,14 +29,37 @@ export async function submitProfile(
   }
 
   try {
-    // Extract data from FormData
+    // Extract data from FormData - handle both old and new format
     const rawData: Record<string, string> = {
       age: formData.get('age') as string,
       career: formData.get('career') as string,
       hobbies: formData.get('hobbies') as string,
       description: formData.get('description') as string,
-      strengthIds: formData.get('strengthIds') as string
     };
+
+        // Handle strengthRankings (new format) or strengthIds (old format)
+    const extractedRankings: Array<{ strengthId: string; position: number }> = [];
+    
+    // Extract strength rankings from form data
+    let index = 0;
+    while (formData.has(`strengthRankings[${index}].strengthId`)) {
+      const strengthId = formData.get(`strengthRankings[${index}].strengthId`) as string;
+      const position = parseInt(formData.get(`strengthRankings[${index}].position`) as string);
+      
+      if (strengthId && !isNaN(position)) {
+        extractedRankings.push({ strengthId, position });
+      }
+      index++;
+    }
+
+    // Fallback to legacy format if no rankings found
+    const strengthIdsData = formData.get('strengthIds') as string;
+
+    if (extractedRankings.length > 0) {
+      rawData.strengthRankings = JSON.stringify(extractedRankings);
+    } else if (strengthIdsData) {
+      rawData.strengthIds = strengthIdsData;
+    }
 
     // Validate the form data using Zod
     const validatedData = ProfileFormDataSchema.safeParse(rawData);
@@ -49,7 +72,7 @@ export async function submitProfile(
       };
     }
 
-    const { age, career, hobbies, description, strengthIds } = validatedData.data;
+    const { age, career, hobbies, description, strengthRankings, strengthIds } = validatedData.data;
 
     // Start database transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -69,13 +92,25 @@ export async function submitProfile(
         where: { userId: session.user.id }
       });
 
-      // Create new user strengths
-      await tx.userStrength.createMany({
-        data: strengthIds.map(strengthId => ({
-          userId: session.user.id!,
-          strengthId
-        }))
-      });
+      // Create new user strengths - handle both ranking and simple ID formats
+      if (strengthRankings && strengthRankings.length > 0) {
+        // New format with rankings
+        await tx.userStrength.createMany({
+          data: strengthRankings.map(ranking => ({
+            userId: session.user.id!,
+            strengthId: ranking.strengthId,
+            position: ranking.position
+          }))
+        });
+      } else if (strengthIds && strengthIds.length > 0) {
+        // Old format without rankings
+        await tx.userStrength.createMany({
+          data: strengthIds.map(strengthId => ({
+            userId: session.user.id!,
+            strengthId
+          }))
+        });
+      }
 
       // Get updated user with relations to check completion
       const userWithRelations = await tx.user.findUnique({
