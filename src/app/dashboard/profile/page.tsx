@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ProfileForm } from "@/components/profile/profile-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -34,18 +36,19 @@ export default async function ProfilePage() {
     orderBy: { name: 'asc' }
   });
 
-  return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Mi Perfil</h1>
-          <p className="text-muted-foreground">
-            Gestiona tu información personal y selecciona tus fortalezas principales.
-          </p>
-        </div>
+  const breadcrumbItems = [
+    { label: "Perfil", current: true }
+  ];
 
-        <ProfileForm user={user} domains={domains} />
-      </div>
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Mi Perfil"
+        description="Gestiona tu información personal y selecciona tus fortalezas principales."
+        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
+      />
+
+      <ProfileForm user={user} domains={domains} />
     </div>
   );
 }

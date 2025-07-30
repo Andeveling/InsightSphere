@@ -54,7 +54,7 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
   const selectedStrengthIds = user.userStrengths.map(us => us.strengthId);
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card>
       <CardHeader>
         <CardTitle>Completa tu Perfil</CardTitle>
         <CardDescription>
