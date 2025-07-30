@@ -24,7 +24,7 @@ model Domain {
 model Strength {
   id           String         @id @default(cuid())
   name         String         @unique
-  nameEs       String?        // Nombre en español (opcional para migración)
+  nameEs       String?        
   description  String
   domainId     String
   domain       Domain         @relation(fields: [domainId], references: [id], onDelete: Cascade)

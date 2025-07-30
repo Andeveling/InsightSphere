@@ -105,3 +105,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error handling and validation throughout the application
 - Responsive design improvements with mobile-first approach
 - Performance optimizations and component architecture improvements
+
+## [Unreleased]
+
+### Added
+- **Bilingual Strength Names:** Added `nameEs` (Spanish name) field to the `Strength` model in the database schema for official HIGH5 strengths.
+- **Seed Update:** Updated `prisma/seed.ts` to populate Spanish names for all strengths.
+- **UI Localization:** All profile and strengths-related UI components now display both English and Spanish names for each strength (e.g., `Analyst / Analista`).
+- **TypeScript Types:** Updated types and props to support the new `nameEs` field throughout the app.
+- **Database Migration:** Applied migration to add the new field and re-seeded the database with bilingual data.
+
+### Changed
+- **Component Updates:** Modified all relevant components to show both names, ensuring Spanish-speaking teams can easily identify strengths.
+- **Type Safety:** Fixed type errors and ensured all strength data includes the new `nameEs` field where needed.
+
+### Technical Details
+- Prisma migration: `add_name_es_to_strength_optional` applied successfully.
+- All seed and UI changes validated with type checks and tests.
+- No breaking changes for existing data; `nameEs` is optional for backward compatibility.
