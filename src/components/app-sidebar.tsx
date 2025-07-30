@@ -11,16 +11,17 @@ import {
 import { BarChart3, Home, Settings, User } from "lucide-react";
 import AppSideBarFooter from "@/components/app-sidebar-footer";
 import Link from "next/link";
+import { auth } from "@/auth";
 
-const items = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Profile", url: "/dashboard/profile", icon: User },
-  { title: "Team Activity", url: "/dashboard/team", icon: BarChart3 },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
-];
+export async function AppSidebar() {
+  const session = await auth();
 
-export function AppSidebar() {
-
+  const items = [
+    { title: "Dashboard", url: "/dashboard", icon: Home },
+    ...(session?.user ? [{ title: "Profile", url: "/dashboard/profile", icon: User }] : []),
+    { title: "Team Activity", url: "/dashboard/team", icon: BarChart3 },
+    { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  ];
 
   return (
     <Sidebar>
@@ -43,7 +44,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-              <AppSideBarFooter />
+      <AppSideBarFooter />
     </Sidebar>
   );
 }

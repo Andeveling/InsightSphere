@@ -45,11 +45,11 @@ This implementation plan covers the complete user profile management system (US-
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-001 | Create /src/app/profile/page.tsx with authentication protection | | |
-| TASK-002 | Create /src/app/profile/edit/page.tsx for profile editing | | |
-| TASK-003 | Implement redirect logic in middleware for incomplete profiles | | |
-| TASK-004 | Create profile layout component with navigation breadcrumbs | | |
-| TASK-005 | Add profile route to navigation menu with conditional display | | |
+| TASK-001 | Create /src/app/dashboard/profile/page.tsx with authentication protection | ✅ | 2025-07-30 |
+| TASK-002 | Create /src/app/dashboard/profile/edit/page.tsx for profile editing | ✅ | 2025-07-30 |
+| TASK-003 | Implement redirect logic in middleware for incomplete profiles | ✅ | 2025-07-30 |
+| TASK-004 | Create profile layout component with navigation breadcrumbs | ✅ | 2025-07-30 |
+| TASK-005 | Add profile route to navigation menu with conditional display | ✅ | 2025-07-30 |
 
 ### Implementation Phase 2: Data Fetching & Validation Schemas
 
@@ -149,8 +149,8 @@ This implementation plan covers the complete user profile management system (US-
 
 ## 5. Files
 
-- **FILE-001**: `/src/app/profile/page.tsx` - Main profile page with display/edit toggle
-- **FILE-002**: `/src/app/profile/edit/page.tsx` - Dedicated profile editing page
+- **FILE-001**: `/src/app/dashboard/profile/page.tsx` - Main profile page with display/edit toggle
+- **FILE-002**: `/src/app/dashboard/profile/edit/page.tsx` - Dedicated profile editing page
 - **FILE-003**: `/src/components/ui/profile-form.tsx` - Main profile form component
 - **FILE-004**: `/src/components/ui/strengths-selector.tsx` - Strengths selection interface
 - **FILE-005**: `/src/components/ui/strength-card.tsx` - Individual strength card component
