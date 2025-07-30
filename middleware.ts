@@ -13,32 +13,56 @@ export async function middleware(request: NextRequest) {
   }
 
   // Si no hay sesión, redirigir a login
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Consultar si el perfil está completo
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { profileComplete: true },
-  });
+  // Si el usuario está autenticado, verificar si su perfil está completo
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { 
+        profileComplete: true,
+        age: true,
+        career: true,
+        hobbies: true,
+        description: true,
+        userStrengths: {
+          select: {
+            strengthId: true
+          }
+        }
+      }
+    });
 
-    // Si el usuario está autenticado, verificar si su perfil está completo
-  if (session?.user?.id) {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { profileComplete: true }
-      });
+    if (user) {
+      // Calcular el estado real del perfil (por si acaso el campo en DB no está actualizado)
+      const actuallyComplete = !!(
+        user.age &&
+        user.career && 
+        user.career.length >= 2 &&
+        user.hobbies && 
+        user.hobbies.length >= 10 &&
+        user.description && 
+        user.description.length >= 20 &&
+        user.userStrengths && 
+        user.userStrengths.length === 5
+      );
 
       // Si el perfil no está completo y no está en rutas de perfil, redirigir a /dashboard/profile
-      if (!user?.profileComplete && 
-          !request.nextUrl.pathname.startsWith('/dashboard/profile')) {
+      if (!actuallyComplete && !pathname.startsWith('/dashboard/profile')) {
         return NextResponse.redirect(new URL('/dashboard/profile', request.url));
       }
-    } catch (error) {
-      console.error('Error checking profile completion:', error);
+
+      // Si el perfil está completo pero el usuario está en /dashboard/profile (página principal),
+      // redirigir al dashboard para mejor UX
+      if (actuallyComplete && pathname === '/dashboard/profile') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
     }
+  } catch (error) {
+    console.error('Error checking profile completion:', error);
+    // En caso de error, permitir continuar para evitar bloquear la aplicación
   }
 
   return NextResponse.next();
