@@ -1,193 +1,399 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { User, UserStrength, Strength, Domain } from "@prisma/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Trophy,
+  Medal,
+  Award,
+  Target,
+  Star,
+  Brain,
+  Heart,
+  Zap,
+  Cog,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  BarChart3,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
+import type { User, UserStrength, Strength, Domain } from "@prisma/client"
 
 interface StrengthsDisplayProps {
   user: User & {
     userStrengths: (UserStrength & {
       strength: Strength & {
-        domain: Domain;
-      };
-    })[];
-  };
-  className?: string;
+        domain: Domain
+      }
+    })[]
+  }
+  className?: string
 }
 
-// Domain color mappings
-const domainColors = {
-  "Doing": "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800",
-  "Feeling": "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800", 
-  "Motivating": "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800",
-  "Thinking": "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-800"
-};
+// Domain configuration using CSS variables
+const domainConfig = {
+  Doing: {
+    color: "bg-chart-1",
+    lightColor: "bg-chart-1/10",
+    textColor: "text-chart-1",
+    borderColor: "border-chart-1/30",
+    icon: Cog,
+  },
+  Feeling: {
+    color: "bg-chart-2",
+    lightColor: "bg-chart-2/10",
+    textColor: "text-chart-2",
+    borderColor: "border-chart-2/30",
+    icon: Heart,
+  },
+  Motivating: {
+    color: "bg-chart-3",
+    lightColor: "bg-chart-3/10",
+    textColor: "text-chart-3",
+    borderColor: "border-chart-3/30",
+    icon: Zap,
+  },
+  Thinking: {
+    color: "bg-chart-4",
+    lightColor: "bg-chart-4/10",
+    textColor: "text-chart-4",
+    borderColor: "border-chart-4/30",
+    icon: Brain,
+  },
+}
 
-const positionIcons = {
-  1: Trophy,
-  2: Medal,
-  3: Award,
-  4: Star,
-  5: Star
-};
-
-const positionColors = {
-  1: "text-yellow-600",
-  2: "text-gray-500",
-  3: "text-orange-600",
-  4: "text-blue-500",
-  5: "text-green-500"
-};
-
-const positionLabels = {
-  1: "1ra Fortaleza Principal",
-  2: "2da Fortaleza",
-  3: "3ra Fortaleza", 
-  4: "4ta Fortaleza",
-  5: "5ta Fortaleza"
-};
+const positionIcons = [Trophy, Medal, Award, Target, Star]
+const positionLabels = ["1ra Fortaleza", "2da Fortaleza", "3ra Fortaleza", "4ta Fortaleza", "5ta Fortaleza"]
 
 export function StrengthsDisplay({ user, className }: StrengthsDisplayProps) {
-  // Sort strengths by position (if available) or by strengthId
+  const [expandedStrengths, setExpandedStrengths] = useState<Set<string>>(new Set())
+  const [showDomainSummary, setShowDomainSummary] = useState(false)
+
+  // Sort strengths by position
   const sortedStrengths = [...user.userStrengths].sort((a, b) => {
     if (a.position !== null && b.position !== null) {
-      return a.position - b.position;
+      return a.position - b.position
     }
-    if (a.position !== null) return -1;
-    if (b.position !== null) return 1;
-    return a.strengthId.localeCompare(b.strengthId);
-  });
+    if (a.position !== null) return -1
+    if (b.position !== null) return 1
+    return a.strengthId.localeCompare(b.strengthId)
+  })
+
+  const toggleStrengthExpansion = (strengthId: string) => {
+    const newExpanded = new Set(expandedStrengths)
+    if (newExpanded.has(strengthId)) {
+      newExpanded.delete(strengthId)
+    } else {
+      newExpanded.add(strengthId)
+    }
+    setExpandedStrengths(newExpanded)
+  }
+
+  const getDomainConfig = (domainName: string) => {
+    return domainConfig[domainName as keyof typeof domainConfig] || domainConfig.Doing
+  }
 
   if (sortedStrengths.length === 0) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-muted-foreground" />
-            Tus Fortalezas HIGH5
-          </CardTitle>
-          <CardDescription>
-            Aún no has seleccionado tus fortalezas principales
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Completa tu perfil para ver tus fortalezas HIGH5</p>
+      <Card className={cn("border-border bg-card", className)}>
+        <CardHeader className="text-center pb-4">
+          <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+            <Star className="h-6 w-6 text-muted-foreground" />
           </div>
+          <CardTitle className="text-lg">Tus Fortalezas HIGH5</CardTitle>
+          <CardDescription>Aún no has seleccionado tus fortalezas principales</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center pb-6">
+          <p className="text-sm text-muted-foreground mb-4">
+            Completa tu perfil para descubrir y mostrar tus fortalezas únicas
+          </p>
+          <Button variant="outline" size="sm">
+            Completar Perfil
+          </Button>
         </CardContent>
       </Card>
-    );
+    )
   }
 
+  // Calculate domain distribution
+  const domainDistribution = sortedStrengths.reduce(
+    (acc, userStrength) => {
+      const domainName = userStrength.strength.domain.name
+      acc[domainName] = (acc[domainName] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>,
+  )
+
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-600" />
-          Tus TOP 5 Fortalezas HIGH5
-        </CardTitle>
-        <CardDescription>
-          Estas son las fortalezas que mejor te representan, ordenadas por prioridad
-        </CardDescription>
+    <Card className={cn("border-border bg-card", className)}>
+      {/* Header */}
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <Trophy className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">TOP 5 Fortalezas HIGH5</CardTitle>
+              <CardDescription className="text-sm">Tus fortalezas principales ordenadas por prioridad</CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">{sortedStrengths.length}/5</span>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+
+      <CardContent className="space-y-6">
+        {/* Strengths Grid - Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-4">
           {sortedStrengths.map((userStrength, index) => {
-            const { strength } = userStrength;
-            const position = userStrength.position || (index + 1);
-            const IconComponent = positionIcons[position as keyof typeof positionIcons] || Star;
-            const iconColor = positionColors[position as keyof typeof positionColors] || "text-gray-400";
-            const positionLabel = positionLabels[position as keyof typeof positionLabels] || `${position}ta Fortaleza`;
+            const { strength } = userStrength
+            const position = userStrength.position || index + 1
+            const PositionIcon = positionIcons[position - 1] || Star
+            const domainInfo = getDomainConfig(strength.domain.name)
+            const DomainIcon = domainInfo.icon
+            const isExpanded = expandedStrengths.has(userStrength.id)
 
             return (
-              <div
+              <Card
                 key={userStrength.id}
-                className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                className={cn(
+                  "relative overflow-hidden border transition-all duration-200 hover:shadow-md group",
+                  domainInfo.borderColor,
+                  domainInfo.lightColor,
+                )}
               >
-                {/* Position Icon */}
-                <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                  <IconComponent className={cn("h-6 w-6", iconColor)} />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    #{position}
-                  </span>
+                {/* Position Badge - Top Right */}
+                <div className="absolute top-3 right-3 z-10">
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg",
+                    domainInfo.color
+                  )}>
+                    <PositionIcon className="h-4 w-4" />
+                  </div>
                 </div>
 
-                {/* Strength Info */}
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge 
-                      variant="outline"
-                      className={cn(
-                        "text-xs",
-                        domainColors[strength.domain.name as keyof typeof domainColors]
-                      )}
-                    >
-                      {strength.domain.nameEs || strength.domain.name}
-                    </Badge>
-                    <h4 className="font-semibold text-lg text-foreground">
-                      {strength.nameEs} ({strength.name})
+                <CardContent className="p-4 space-y-3">
+                  {/* Header Section */}
+                  <div className="space-y-2 pr-10"> {/* Add right padding for position badge */}
+                    <div className="flex items-center gap-2">
+                      <div className={cn("w-6 h-6 rounded flex items-center justify-center", domainInfo.color)}>
+                        <DomainIcon className="h-3.5 w-3.5 text-white" />
+                      </div>
+                      <Badge variant="outline" className={cn("text-xs", domainInfo.textColor)}>
+                        {strength.domain.nameEs || strength.domain.name}
+                      </Badge>
+                    </div>
+                    
+                    <h4 className="font-semibold text-base leading-tight text-foreground">
+                      {strength.nameEs || strength.name}
                     </h4>
                   </div>
-                  
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+
+                  {/* Description */}
+                  <p className={cn(
+                    "text-sm text-muted-foreground leading-relaxed transition-all duration-200",
+                    isExpanded ? "line-clamp-none" : "line-clamp-3"
+                  )}>
                     {strength.briefDefinition || strength.description}
                   </p>
 
-                  {strength.fullDefinition && (
-                    <details className="text-sm">
-                      <summary className="cursor-pointer text-primary hover:text-primary/80 font-medium">
-                        Ver definición completa
-                      </summary>
-                      <p className="mt-2 text-muted-foreground leading-relaxed pl-4 border-l-2 border-primary/20">
-                        {strength.fullDefinition}
-                      </p>
-                    </details>
-                  )}
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="space-y-3 pt-3 border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
+                      {strength.fullDefinition && (
+                        <div className="space-y-2">
+                          <h5 className="font-medium text-sm text-foreground">Definición Completa:</h5>
+                          <p className="text-sm text-muted-foreground leading-relaxed bg-muted/50 p-3 rounded-lg">
+                            {strength.fullDefinition}
+                          </p>
+                        </div>
+                      )}
 
-                  {strength.strengthsDynamics && (
-                    <div className="bg-muted/50 p-3 rounded-md">
-                      <h5 className="font-medium text-sm text-foreground mb-1">Dinámicas:</h5>
-                      <p className="text-xs text-muted-foreground">
-                        {strength.strengthsDynamics}
-                      </p>
+                      {strength.strengthsDynamics && (
+                        <div className="space-y-2">
+                          <h5 className="font-medium text-sm text-foreground">Dinámicas:</h5>
+                          <p className="text-sm text-muted-foreground leading-relaxed bg-muted/50 p-3 rounded-lg">
+                            {strength.strengthsDynamics}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  
-                  <div className="text-xs text-muted-foreground font-medium">
-                    {positionLabel}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {positionLabels[position - 1] || `${position}ª Fortaleza`}
+                    </span>
+                    {(strength.fullDefinition || strength.strengthsDynamics) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleStrengthExpansion(userStrength.id)}
+                        className="h-8 px-3 text-xs opacity-70 hover:opacity-100 transition-opacity"
+                      >
+                        {isExpanded ? (
+                          <>
+                            <ChevronUp className="h-3 w-3 mr-1" />
+                            Menos
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="h-3 w-3 mr-1" />
+                            Más detalles
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
-                </div>
-              </div>
-            );
+                </CardContent>
+              </Card>
+            )
           })}
         </div>
 
-        {/* Summary by Domain */}
-        <div className="mt-6 pt-4 border-t border-border/40">
-          <h4 className="font-medium text-sm text-muted-foreground mb-3">
-            Distribución por Dominio
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {Array.from(new Set(sortedStrengths.map(us => us.strength.domain.name))).map(domainName => {
-              const count = sortedStrengths.filter(us => us.strength.domain.name === domainName).length;
-              return (
-                <Badge
-                  key={domainName}
-                  variant="outline"
-                  className={cn(
-                    "text-xs",
-                    domainColors[domainName as keyof typeof domainColors]
-                  )}
-                >
-                  {domainName} ({count})
-                </Badge>
-              );
-            })}
+        {/* Domain Summary */}
+        <Card className="border-border/50 bg-muted/30">
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-sm text-foreground flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Distribución por Dominio
+              </h4>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDomainSummary(!showDomainSummary)}
+                className="h-8 px-3 text-xs"
+              >
+                {showDomainSummary ? (
+                  <>
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    Ocultar
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3 mr-1" />
+                    Mostrar detalles
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Domain Summary Pills */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(domainDistribution).map(([domainName, count]) => {
+                const domainInfo = getDomainConfig(domainName)
+                const DomainIcon = domainInfo.icon
+                const domainNameEs = domainName === "Doing" ? "Hacer" :
+                                  domainName === "Feeling" ? "Sentir" :
+                                  domainName === "Motivating" ? "Motivar" : "Pensar"
+                
+                return (
+                  <div
+                    key={domainName}
+                    className={cn(
+                      "relative p-3 rounded-lg border text-center transition-all duration-200 hover:shadow-sm",
+                      domainInfo.lightColor,
+                      domainInfo.borderColor,
+                    )}
+                  >
+                    <div className={cn("w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center", domainInfo.color)}>
+                      <DomainIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <div className={cn("text-xl font-bold mb-1", domainInfo.textColor)}>
+                      {count}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">
+                      {domainNameEs}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Expanded Domain Details */}
+            {showDomainSummary && (
+              <div className="pt-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.keys(domainDistribution).map((domainName) => {
+                    const domainInfo = getDomainConfig(domainName)
+                    const DomainIcon = domainInfo.icon
+                    const count = domainDistribution[domainName]
+                    const strengthsInDomain = sortedStrengths.filter((us) => us.strength.domain.name === domainName)
+                    const domainNameEs = domainName === "Doing" ? "Hacer" :
+                                      domainName === "Feeling" ? "Sentir" :
+                                      domainName === "Motivating" ? "Motivar" : "Pensar"
+
+                    return (
+                      <div
+                        key={domainName}
+                        className={cn(
+                          "p-4 rounded-lg border space-y-3",
+                          domainInfo.lightColor, 
+                          domainInfo.borderColor
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", domainInfo.color)}>
+                            <DomainIcon className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <h5 className={cn("font-semibold text-sm", domainInfo.textColor)}>
+                              {domainNameEs}
+                            </h5>
+                            <span className="text-xs text-muted-foreground">
+                              {count} fortaleza{count !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {strengthsInDomain.map((us) => (
+                            <div key={us.id} className="flex items-center justify-between p-2 bg-card/50 rounded border border-border/30">
+                              <span className="text-sm font-medium truncate">
+                                {us.strength.nameEs || us.strength.name}
+                              </span>
+                              <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
+                                #{us.position}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Statistics Footer */}
+        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border/30">
+          <div className="text-center p-3 bg-card/50 rounded-lg border border-border/50">
+            <div className="text-xl font-bold text-primary mb-1">{sortedStrengths.length}</div>
+            <div className="text-xs text-muted-foreground font-medium">Fortalezas</div>
+          </div>
+          <div className="text-center p-3 bg-card/50 rounded-lg border border-border/50">
+            <div className="text-xl font-bold text-primary mb-1">{Object.keys(domainDistribution).length}</div>
+            <div className="text-xs text-muted-foreground font-medium">Dominios</div>
+          </div>
+          <div className="text-center p-3 bg-card/50 rounded-lg border border-border/50">
+            <div className="text-xl font-bold text-primary mb-1">
+              {Math.round((Object.keys(domainDistribution).length / 4) * 100)}%
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">Balance</div>
           </div>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

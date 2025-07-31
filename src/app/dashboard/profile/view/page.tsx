@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Calendar, Briefcase, Heart, FileText, Edit, Brain } from "lucide-react";
 import Link from "next/link";
+import { StrengthsOverview } from "@/components/profile/strengths-overview";
 
 export default async function ProfileViewPage() {
   const session = await auth();
@@ -54,17 +55,13 @@ export default async function ProfileViewPage() {
     return acc;
   }, {} as Record<string, number>);
 
-  const breadcrumbItems = [
-    { label: "Perfil", href: "/dashboard/profile" },
-    { label: "Ver Perfil", current: true }
-  ];
+
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <PageHeader
         title="Mi Perfil"
         description="Visualiza tu información personal y tus fortalezas HIGH5"
-        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
       >
         <Button asChild>
           <Link href="/dashboard/profile/edit">
@@ -74,9 +71,9 @@ export default async function ProfileViewPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Personal Information */}
-        <div className="space-y-6">
+        <div className="space-y-4 col-span-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -164,11 +161,7 @@ export default async function ProfileViewPage() {
             </Card>
           )}
         </div>
-
-        {/* Strengths Display */}
-        <div className="lg:col-span-2">
-          <StrengthsDisplay user={user} />
-        </div>
+          <StrengthsOverview user={user} className="col-span-8" />
       </div>
 
       {/* Domains Overview */}
