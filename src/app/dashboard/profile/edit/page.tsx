@@ -22,7 +22,8 @@ export default async function ProfileEditPage() {
       userStrengths: {
         include: {
           strength: true
-        }
+        },
+        orderBy: { position: 'asc' }
       }
     }
   });

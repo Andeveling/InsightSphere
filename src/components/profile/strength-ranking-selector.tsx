@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Trophy, Medal, Award, Target, Star, Brain, Heart, Zap, Cog, ChevronDown, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Domain, Strength } from "@prisma/client"
+import { debugRankings } from "../../../debug-utils"
 
 interface StrengthRankingSelectorProps {
   domains: (Domain & {
@@ -61,19 +62,40 @@ export function StrengthRankingSelector({
   disabled,
   name,
 }: StrengthRankingSelectorProps) {
-  const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>([null, null, null, null, null])
   const [showDomainInfo, setShowDomainInfo] = useState(false)
 
-  // Initialize from selectedRankings
-  useEffect(() => {
+  // Calcular el estado inicial usando useMemo para estabilizar
+  const initialStrengths = useMemo(() => {
+    debugRankings(selectedRankings, "StrengthRankingSelector - received props")
+    
+    if (selectedRankings.length === 0) {
+      return [null, null, null, null, null] as (string | null)[]
+    }
+
     const positions: (string | null)[] = [null, null, null, null, null]
+    
     selectedRankings.forEach((ranking) => {
-      if (ranking.position >= 1 && ranking.position <= 5) {
-        positions[ranking.position - 1] = ranking.strengthId
+      console.log(`🔍 Processing ranking:`, ranking, `position type:`, typeof ranking.position)
+      const position = Number(ranking.position)
+      if (Number.isInteger(position) && position >= 1 && position <= 5) {
+        console.log(`✅ Setting position ${position} (index ${position - 1}) to strengthId:`, ranking.strengthId)
+        positions[position - 1] = ranking.strengthId
+      } else {
+        console.log(`❌ Position ${ranking.position} is out of range or invalid`)
       }
     })
-    setSelectedStrengths(positions)
+    
+    console.log("🔍 Final positions array:", positions)
+    return positions
   }, [selectedRankings])
+
+  // Estado con inicialización estable
+  const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>(initialStrengths)
+
+  // Sincronizar cuando cambie el valor estable
+  useEffect(() => {
+    setSelectedStrengths(initialStrengths)
+  }, [initialStrengths])
 
   const getDomainConfig = (domainName: string) => {
     return domainConfig[domainName as keyof typeof domainConfig] || domainConfig.Doing

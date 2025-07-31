@@ -30,7 +30,8 @@ export default async function ProfileViewPage() {
               domain: true
             }
           }
-        }
+        },
+        orderBy: { position: 'asc' }
       }
     }
   });

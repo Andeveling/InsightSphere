@@ -25,6 +25,7 @@ interface ProfileFormProps {
   domains: (Domain & {
     strengths: Strength[]
   })[]
+  initialStrengthRankings?: Array<{ strengthId: string; position: number }>
 }
 
 const initialState: ActionResponse = {
@@ -32,10 +33,14 @@ const initialState: ActionResponse = {
   message: "",
 }
 
-export function ProfileForm({ user, domains }: ProfileFormProps) {
+export function ProfileForm({ user, domains, initialStrengthRankings }: ProfileFormProps) {
+  console.log("🔍 ProfileForm - initial load:", user)
+  console.log("🚀 ProfileForm - received initial rankings:", initialStrengthRankings)
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitProfile, initialState)
-  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number }>>([])
+  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number }>>(
+    initialStrengthRankings || []
+  )
 
   // Initialize strength rankings from user data
   useEffect(() => {
