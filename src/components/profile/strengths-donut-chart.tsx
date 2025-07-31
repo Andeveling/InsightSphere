@@ -1,11 +1,10 @@
 "use client"
 
 import React from "react"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 import type { Domain, Strength, User, UserStrength } from "@prisma/client"
 import { BarChart3, Brain, Cog, Heart, Info, TrendingUp, Zap } from "lucide-react"
@@ -83,7 +82,7 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
       color: "hsl(var(--chart-1))",
     },
     Feeling: {
-      label: "Sentir", 
+      label: "Sentir",
       color: "hsl(var(--chart-2))",
     },
     Motivating: {
@@ -102,37 +101,45 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
       const count = domainDistribution[domainName] || 0
       return {
         domain: domainName,
-        domainEs: domainName === "Doing" ? "Hacer" 
-                 : domainName === "Feeling" ? "Sentir"
-                 : domainName === "Motivating" ? "Motivar" 
-                 : "Pensar",
+        domainEs:
+          domainName === "Doing"
+            ? "Hacer"
+            : domainName === "Feeling"
+              ? "Sentir"
+              : domainName === "Motivating"
+                ? "Motivar"
+                : "Pensar",
         count,
         percentage: 0, // Will be calculated after filtering
-        fill: `var(--color-chart-${index + 1})`,
+        fill: config.color, // Use the actual color from domainConfig
         color: config.color,
         description: config.description,
         focus: config.focus,
       }
     })
-    .filter(item => item.count > 0) // Only show domains with strengths
+    .filter((item) => item.count > 0) // Only show domains with strengths
 
   // Calculate percentages for domains with strengths
   const totalStrengths = chartData.reduce((sum, item) => sum + item.count, 0)
-  chartData.forEach(item => {
+  chartData.forEach((item) => {
     item.percentage = totalStrengths > 0 ? Math.round((item.count / totalStrengths) * 100) : 0
   })
 
   // Debug: Log chart data
-  console.log('Chart Data:', chartData)
-  console.log('Total Strengths:', totalStrengths)
+  console.log("Chart Data:", chartData)
+  console.log("Total Strengths:", totalStrengths)
 
   // All domain data for legend (including zeros)
   const allDomainsData = Object.entries(domainConfig).map(([domainName, config]) => ({
     domain: domainName,
-    domainEs: domainName === "Doing" ? "Hacer" 
-             : domainName === "Feeling" ? "Sentir"
-             : domainName === "Motivating" ? "Motivar" 
-             : "Pensar",
+    domainEs:
+      domainName === "Doing"
+        ? "Hacer"
+        : domainName === "Feeling"
+          ? "Sentir"
+          : domainName === "Motivating"
+            ? "Motivar"
+            : "Pensar",
     count: domainDistribution[domainName] || 0,
     color: config.color,
     icon: config.icon,
@@ -142,7 +149,7 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
 
   // Calculate insights
   const dominantDomain = allDomainsData.reduce((prev, current) => (prev.count > current.count ? prev : current))
-  const activeDomainsCount = allDomainsData.filter(d => d.count > 0).length
+  const activeDomainsCount = allDomainsData.filter((d) => d.count > 0).length
   const balanceScore = activeDomainsCount > 0 ? Math.round((activeDomainsCount / 4) * 100) : 0
 
   if (totalStrengths === 0) {
@@ -189,42 +196,32 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
           )}
         </div>
       </CardHeader>
-
       <CardContent className="space-y-6">
         {/* Donut Chart */}
         <div className="relative flex items-center justify-center">
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[280px] min-h-[280px]"
-          >
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[280px] min-h-[280px]">
             <PieChart width={280} height={280}>
               <ChartTooltip
                 cursor={false}
-                content={
-                  <ChartTooltipContent
-                    labelKey="domainEs"
-                    nameKey="count"
-                    formatter={(value, name, props) => [
-                      <div key={name} className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: props?.payload?.color }}
-                          />
-                          <span className="font-medium">{props?.payload?.domainEs}</span>
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload
+                    return (
+                      <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.fill }} />
+                          <span className="font-medium text-foreground">{data.domainEs}</span>
                         </div>
-                        <p className="text-sm">
-                          <span className="font-bold">{value}</span> fortaleza{Number(value) > 1 ? 's' : ''} 
-                          <span className="text-muted-foreground"> ({props?.payload?.percentage}%)</span>
+                        <p className="text-sm text-foreground mb-1">
+                          <span className="font-bold">{data.count}</span> fortaleza{data.count > 1 ? "s" : ""}{" "}
+                          <span className="text-muted-foreground"> ({data.percentage}%)</span>
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {props?.payload?.focus}
-                        </p>
-                      </div>,
-                      ""
-                    ]}
-                  />
-                }
+                        <p className="text-xs text-muted-foreground">{data.focus}</p>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
               />
               <Pie
                 data={chartData}
@@ -236,15 +233,11 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                 dataKey="count"
               >
                 {chartData.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.fill}
-                  />
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
             </PieChart>
           </ChartContainer>
-          
           {/* Center Stats Overlay */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
@@ -259,14 +252,13 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
           {allDomainsData.map((domain) => {
             const DomainIcon = domain.icon
             const percentage = totalStrengths > 0 ? Math.round((domain.count / totalStrengths) * 100) : 0
-            
             return (
               <div
                 key={domain.domain}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg border transition-all",
-                  domain.count > 0 
-                    ? "border-primary/30 bg-primary/5 ring-1 ring-primary/10" 
+                  domain.count > 0
+                    ? "border-primary/30 bg-primary/5 ring-1 ring-primary/10"
                     : "border-border/50 bg-muted/20",
                 )}
               >
@@ -286,9 +278,7 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground truncate">{domain.focus}</p>
-                      {domain.count > 0 && (
-                        <span className="text-xs font-medium text-primary">{percentage}%</span>
-                      )}
+                      {domain.count > 0 && <span className="text-xs font-medium text-primary">{percentage}%</span>}
                     </div>
                   </div>
                 </div>
@@ -304,7 +294,6 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
               <TrendingUp className="h-4 w-4 text-primary" />
               <h4 className="font-medium text-sm text-foreground">Análisis de tu Perfil</h4>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Dominant Domain */}
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
@@ -320,22 +309,20 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                   <h5 className="font-semibold text-sm text-primary">Fortaleza Principal</h5>
                 </div>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  {dominantDomain.domainEs} ({dominantDomain.count} fortaleza{dominantDomain.count > 1 ? 's' : ''})
+                  {dominantDomain.domainEs} ({dominantDomain.count} fortaleza{dominantDomain.count > 1 ? "s" : ""})
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {Math.round((dominantDomain.count / totalStrengths) * 100)}% de tu perfil se enfoca en {dominantDomain.focus.toLowerCase()}
+                  {Math.round((dominantDomain.count / totalStrengths) * 100)}% de tu perfil se enfoca en{" "}
+                  {dominantDomain.focus.toLowerCase()}
                 </p>
               </div>
-
               {/* Diversity Score */}
               <div className="bg-muted/50 border border-border/50 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
                   <h5 className="font-semibold text-sm text-foreground">Diversidad</h5>
                 </div>
-                <p className="text-sm text-foreground font-medium mb-1">
-                  {activeDomainsCount} de 4 dominios activos
-                </p>
+                <p className="text-sm text-foreground font-medium mb-1">{activeDomainsCount} de 4 dominios activos</p>
                 <p className="text-xs text-muted-foreground">
                   {balanceScore >= 75
                     ? "Perfil muy diverso y equilibrado"
@@ -345,7 +332,6 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                 </p>
               </div>
             </div>
-
             {/* Recommendations */}
             <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
               <h5 className="font-semibold text-sm text-foreground mb-2">Recomendaciones</h5>
@@ -354,7 +340,8 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                   <li className="flex items-start gap-2">
                     <span className="text-accent mt-1">•</span>
                     <span>
-                      Lidera proyectos que requieran {dominantDomain.domainEs.toLowerCase()}, es tu zona de mayor fortaleza
+                      Lidera proyectos que requieran {dominantDomain.domainEs.toLowerCase()}, es tu zona de mayor
+                      fortaleza
                     </span>
                   </li>
                 )}
@@ -369,9 +356,7 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
                 {activeDomainsCount >= 3 && (
                   <li className="flex items-start gap-2">
                     <span className="text-accent mt-1">•</span>
-                    <span>
-                      Tu perfil diverso te permite adaptarte bien a diferentes roles y equipos
-                    </span>
+                    <span>Tu perfil diverso te permite adaptarte bien a diferentes roles y equipos</span>
                   </li>
                 )}
                 <li className="flex items-start gap-2">
