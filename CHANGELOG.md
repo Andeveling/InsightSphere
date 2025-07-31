@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Enhanced Strength Profiles - Phase 1 & 2 (2025-07-31)
+
+**Phase 1: Database Schema Enhancement**
+- Added detailed profile fields to the Strength model:
+  - `briefDefinition`: Breve definición de la fortaleza
+  - `fullDefinition`: Descripción completa y detallada
+  - `howToUseMoreEffectively`: Consejos para usar la fortaleza más efectivamente
+  - `watchOuts`: Precauciones y aspectos a tener en cuenta
+  - `strengthsDynamics`: Cómo interactúa con otras fortalezas
+  - `bestPartners`: Fortalezas que se complementan mejor (campo JSON)
+  - `careerApplications`: Aplicaciones profesionales recomendadas (campo JSON)
+- Created database migration `20250730222130_enhance_strength_profiles`
+
+**Phase 2: Seed Data Enhancement**
+- Enhanced seed.ts script to import detailed strength profiles
+- Added comprehensive profiles for all 20 HIGH5 strengths
+- Implemented safe parsing of structured strength data
+- Added validation script to verify data integrity
+- Each strength now includes detailed guidance, career applications, and partnership recommendations
+
+**Bilingual Support**
+- Added Spanish names (`nameEs`) for all 20 strengths
+- Updated UI components to display both languages
+- Created database migration `20250730204847_add_nameEs_to_strength_optional`
+- Enhanced component props to support bilingual display
+
 #### Profile Management System - Phase 1 & 2 (2025-07-30)
 
 **Phase 1: Profile Page Structure & Routing**

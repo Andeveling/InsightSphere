@@ -1,5 +1,45 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import * as fs from 'fs'
+import * as path from 'path'
+
+// Interfaces para los datos detallados de las fortalezas
+interface EnhancedStrengthData {
+  strength: string;
+  nameEs: string;
+  domain: string;
+  briefDefinition: string;
+  details: {
+    fullDefinition?: string;
+    howToUseMoreEffectively?: string[];
+    watchOuts?: string[];
+    strengthsDynamics?: string;
+    bestPartners?: string[];
+    careerApplications?: string[];
+  };
+}
+
+interface StrengthData {
+  name: string;
+  nameEs: string;
+  domain: string;
+  description: string;
+}
+
+// Utilizamos tipos genéricos para facilitar el trabajo con los tipos de Prisma
+interface CreateStrengthData {
+  name: string;
+  nameEs: string;
+  description: string;
+  domainId: string;
+  briefDefinition?: string;
+  fullDefinition?: string;
+  howToUseMoreEffectively?: string;
+  watchOuts?: string;
+  strengthsDynamics?: string;
+  bestPartners?: any;
+  careerApplications?: any;
+}
 
 const prisma = new PrismaClient()
 
@@ -205,6 +245,47 @@ async function main() {
   )
   console.log(`✅ Creados ${createdDomains.length} dominios`)
 
+  // Importar y procesar los datos del archivo example.js
+  console.log('📚 Importando datos detallados de fortalezas...')
+  
+  let enhancedStrengthsData: EnhancedStrengthData[] = [];
+  try {
+    const exampleFilePath = path.join(__dirname, 'example.js');
+    const exampleDataContent = fs.readFileSync(exampleFilePath, 'utf8');
+    
+    // Reemplazamos los comentarios y hacemos una conversión segura
+    // En lugar de usar eval(), utilizamos JSON.parse con algunas transformaciones
+    // para hacer que el formato JS sea compatible con JSON
+    const cleanedContent = exampleDataContent
+      .replace(/\/\/.*$/gm, '')               // Eliminar comentarios de una línea
+      .replace(/\/\*[\s\S]*?\*\//g, '')       // Eliminar comentarios multi-línea
+      .replace(/^\s*\[/, '[')                 // Asegurar que comienza con un corchete
+      .replace(/\]\s*$/, ']')                 // Asegurar que termina con un corchete
+      .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Convertir propiedades a formato JSON
+      .replace(/'/g, '"');                    // Convertir comillas simples a dobles
+
+    try {
+      enhancedStrengthsData = JSON.parse(cleanedContent) as EnhancedStrengthData[];
+      console.log(`✅ Datos detallados importados correctamente: ${enhancedStrengthsData.length} fortalezas con perfiles enriquecidos`);
+    } catch (jsonError) {
+      console.error('❌ Error al parsear JSON:', jsonError);
+      console.warn('⚠️ Intentando cargar con método alternativo...');
+
+      // Método de respaldo usando Function constructor (más seguro que eval pero aún no ideal)
+      try {
+        const safeEval = new Function('return ' + exampleDataContent)();
+        enhancedStrengthsData = safeEval as EnhancedStrengthData[];
+        console.log(`✅ Datos detallados importados con método alternativo: ${enhancedStrengthsData.length} fortalezas`);
+      } catch (evalError) {
+        console.error('❌ Error en método alternativo:', evalError);
+        console.log('⚠️ Continuando con datos básicos...');
+      }
+    }
+  } catch (fileError) {
+    console.error('❌ Error al leer el archivo de datos detallados:', fileError);
+    console.log('⚠️ Continuando con datos básicos...');
+  }
+
   // Crear fortalezas
   console.log('💪 Creando fortalezas...')
   const createdStrengths = await Promise.all(
@@ -213,17 +294,51 @@ async function main() {
       if (!domain) {
         throw new Error(`Domain ${strength.domain} not found`)
       }
-      return await prisma.strength.create({
-        data: {
-          name: strength.name,
-          nameEs: strength.nameEs,
-          description: strength.description,
-          domainId: domain.id
+
+      // Buscar datos detallados en el archivo example.js
+      const enhancedData = enhancedStrengthsData.find(
+        (s: EnhancedStrengthData) => s.strength === strength.name && s.domain === strength.domain
+      );
+
+      // Preparar los datos para crear la fortaleza
+      const strengthData: CreateStrengthData = {
+        name: strength.name,
+        nameEs: strength.nameEs,
+        description: strength.description,
+        domainId: domain.id,
+      };
+
+      // Si encontramos datos detallados, los añadimos
+      if (enhancedData) {
+        strengthData.briefDefinition = enhancedData.briefDefinition || strength.description;
+        
+        if (enhancedData.details) {
+          strengthData.fullDefinition = enhancedData.details.fullDefinition;
+          // Manejar el caso donde howToUseMoreEffectively puede no existir
+          if (enhancedData.details.howToUseMoreEffectively && Array.isArray(enhancedData.details.howToUseMoreEffectively)) {
+            strengthData.howToUseMoreEffectively = enhancedData.details.howToUseMoreEffectively.join("\n");
+          } else {
+            // Usamos el formato por defecto si no existe
+            strengthData.howToUseMoreEffectively = "No hay consejos específicos disponibles para esta fortaleza.";
+          }
+          strengthData.watchOuts = enhancedData.details.watchOuts?.join("\n");
+          strengthData.strengthsDynamics = enhancedData.details.strengthsDynamics;
+          // Para campos JSON necesitamos convertirlos adecuadamente para Prisma
+          if (enhancedData.details.bestPartners) {
+            strengthData.bestPartners = enhancedData.details.bestPartners as any;
+          }
+          if (enhancedData.details.careerApplications) {
+            strengthData.careerApplications = enhancedData.details.careerApplications as any;
+          }
         }
-      })
+      }
+
+      return await prisma.strength.create({
+        data: strengthData
+      });
     })
   )
-  console.log(`✅ Creadas ${createdStrengths.length} fortalezas`)
+  console.log(`✅ Creadas ${createdStrengths.length} fortalezas con perfiles enriquecidos`)
 
   // Crear equipos  
   console.log('👥 Creando equipos...')
