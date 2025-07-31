@@ -1,315 +1,330 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, Target, Star, Brain, Heart, Zap, Cog } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { Domain, Strength } from "@prisma/client";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Trophy, Medal, Award, Target, Star, Brain, Heart, Zap, Cog, ChevronDown, Sparkles } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { Domain, Strength } from "@prisma/client"
 
 interface StrengthRankingSelectorProps {
   domains: (Domain & {
-    strengths: Strength[];
-  })[];
-  selectedRankings: { strengthId: string; position: number }[];
-  onChange: (rankings: { strengthId: string; position: number }[]) => void;
-  disabled?: boolean;
-  name: string;
+    strengths: Strength[]
+  })[]
+  selectedRankings: { strengthId: string; position: number }[]
+  onChange: (rankings: { strengthId: string; position: number }[]) => void
+  disabled?: boolean
+  name: string
 }
 
-// Domain color mappings with icons
+// Domain color mappings with icons using CSS variables
 const domainConfig = {
-  "Doing": {
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100 dark:bg-blue-900/20",
-    textColor: "text-blue-700 dark:text-blue-300",
-    borderColor: "border-blue-200 dark:border-blue-800",
+  Doing: {
+    color: "bg-chart-1",
+    lightColor: "bg-chart-1/10",
+    textColor: "text-chart-1",
+    borderColor: "border-chart-1/30",
     icon: Cog,
   },
-  "Feeling": {
-    color: "bg-pink-500", 
-    lightColor: "bg-pink-100 dark:bg-pink-900/20",
-    textColor: "text-pink-700 dark:text-pink-300",
-    borderColor: "border-pink-200 dark:border-pink-800",
+  Feeling: {
+    color: "bg-chart-2",
+    lightColor: "bg-chart-2/10",
+    textColor: "text-chart-2",
+    borderColor: "border-chart-2/30",
     icon: Heart,
   },
-  "Motivating": {
-    color: "bg-orange-500",
-    lightColor: "bg-orange-100 dark:bg-orange-900/20", 
-    textColor: "text-orange-700 dark:text-orange-300",
-    borderColor: "border-orange-200 dark:border-orange-800",
+  Motivating: {
+    color: "bg-chart-3",
+    lightColor: "bg-chart-3/10",
+    textColor: "text-chart-3",
+    borderColor: "border-chart-3/30",
     icon: Zap,
   },
-  "Thinking": {
-    color: "bg-purple-500",
-    lightColor: "bg-purple-100 dark:bg-purple-900/20",
-    textColor: "text-purple-700 dark:text-purple-300", 
-    borderColor: "border-purple-200 dark:border-purple-800",
+  Thinking: {
+    color: "bg-chart-4",
+    lightColor: "bg-chart-4/10",
+    textColor: "text-chart-4",
+    borderColor: "border-chart-4/30",
     icon: Brain,
-  }
-};
+  },
+}
 
-const rankIcons = [Trophy, Medal, Award, Target, Star];
-const rankLabels = ["1ra Fortaleza", "2da Fortaleza", "3ra Fortaleza", "4ta Fortaleza", "5ta Fortaleza"];
+const rankIcons = [Trophy, Medal, Award, Target, Star]
+const rankLabels = ["1ra", "2da", "3ra", "4ta", "5ta"]
 
 export function StrengthRankingSelector({
   domains,
   selectedRankings,
   onChange,
   disabled,
-  name
+  name,
 }: StrengthRankingSelectorProps) {
-  // Convert rankings format to positions array for easier handling
-  const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>([null, null, null, null, null]);
+  const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>([null, null, null, null, null])
+  const [showDomainInfo, setShowDomainInfo] = useState(false)
 
   // Initialize from selectedRankings
   useEffect(() => {
-    const positions: (string | null)[] = [null, null, null, null, null];
-    selectedRankings.forEach(ranking => {
+    const positions: (string | null)[] = [null, null, null, null, null]
+    selectedRankings.forEach((ranking) => {
       if (ranking.position >= 1 && ranking.position <= 5) {
-        positions[ranking.position - 1] = ranking.strengthId;
+        positions[ranking.position - 1] = ranking.strengthId
       }
-    });
-    setSelectedStrengths(positions);
-  }, [selectedRankings]);
+    })
+    setSelectedStrengths(positions)
+  }, [selectedRankings])
 
   const getDomainConfig = (domainName: string) => {
-    return domainConfig[domainName as keyof typeof domainConfig] || domainConfig.Doing;
-  };
+    return domainConfig[domainName as keyof typeof domainConfig] || domainConfig.Doing
+  }
 
   const getStrengthById = (strengthId: string) => {
     for (const domain of domains) {
-      const strength = domain.strengths.find(s => s.id === strengthId);
+      const strength = domain.strengths.find((s) => s.id === strengthId)
       if (strength) {
-        return { strength, domain };
+        return { strength, domain }
       }
     }
-    return null;
-  };
+    return null
+  }
 
   const handleStrengthSelect = (position: number, strengthId: string) => {
-    if (disabled) return;
+    if (disabled) return
 
-    const newSelected = [...selectedStrengths];
-
-    // Si la fortaleza ya está seleccionada en otra posición, la removemos
-    const existingIndex = newSelected.indexOf(strengthId);
+    const newSelected = [...selectedStrengths]
+    const existingIndex = newSelected.indexOf(strengthId)
     if (existingIndex !== -1) {
-      newSelected[existingIndex] = null;
+      newSelected[existingIndex] = null
     }
+    newSelected[position] = strengthId
+    setSelectedStrengths(newSelected)
 
-    newSelected[position] = strengthId;
-    setSelectedStrengths(newSelected);
-
-    // Convert back to rankings format
     const newRankings = newSelected
-      .map((strengthId, index) => strengthId ? { strengthId, position: index + 1 } : null)
-      .filter(Boolean) as { strengthId: string; position: number }[];
-    
-    onChange(newRankings);
-  };
+      .map((strengthId, index) => (strengthId ? { strengthId, position: index + 1 } : null))
+      .filter(Boolean) as { strengthId: string; position: number }[]
+    onChange(newRankings)
+  }
 
   const getAvailableStrengths = (currentPosition: number) => {
-    const currentSelection = selectedStrengths[currentPosition];
-    const allStrengths: (Strength & { domain: Domain })[] = [];
-    
-    domains.forEach(domain => {
-      domain.strengths.forEach(strength => {
-        allStrengths.push({ ...strength, domain });
-      });
-    });
+    const currentSelection = selectedStrengths[currentPosition]
+    const allStrengths: (Strength & { domain: Domain })[] = []
+
+    domains.forEach((domain) => {
+      domain.strengths.forEach((strength) => {
+        allStrengths.push({ ...strength, domain })
+      })
+    })
 
     return allStrengths.filter(
-      (strength) => !selectedStrengths.includes(strength.id) || strength.id === currentSelection
-    );
-  };
+      (strength) => !selectedStrengths.includes(strength.id) || strength.id === currentSelection,
+    )
+  }
 
-  const selectedCount = selectedStrengths.filter((s) => s !== null).length;
+  const selectedCount = selectedStrengths.filter((s) => s !== null).length
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
-            <Trophy className="h-6 w-6 text-yellow-600" />
-            Selecciona tus TOP 5 Fortalezas
-          </CardTitle>
-          <p className="text-muted-foreground">
-            Elige exactamente 5 fortalezas que mejor te representen y ordénalas por prioridad (1-5).
-          </p>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <Badge variant="secondary" className="text-lg px-4 py-2">
-              {selectedCount}/5 fortalezas seleccionadas
-            </Badge>
+    <div className="space-y-4">
+      {/* Compact Header */}
+      <Card className="border-border bg-primary text-primary-foreground">
+        <CardContent className="p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5" />
+            <h2 className="text-lg font-bold">TOP 5 Fortalezas</h2>
           </div>
+          <p className="text-sm text-primary-foreground/80 mb-3">Selecciona y ordena tus 5 fortalezas principales</p>
+          <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1 rounded-full">
+            <div
+              className={cn(
+                "h-2 w-2 rounded-full transition-colors",
+                selectedCount === 5 ? "bg-primary-foreground" : "bg-primary-foreground/40",
+              )}
+            />
+            <span className="text-sm font-medium">{selectedCount}/5 seleccionadas</span>
+          </div>
+        </CardContent>
+      </Card>
 
-          <div className="space-y-4">
-            {selectedStrengths.map((selectedStrengthId, index) => {
-              const RankIcon = rankIcons[index];
-              const availableStrengths = getAvailableStrengths(index);
-              const strengthData = selectedStrengthId ? getStrengthById(selectedStrengthId) : null;
-              const domainInfo = strengthData ? getDomainConfig(strengthData.domain.name) : null;
+      {/* Compact Selection Grid */}
+      <div className="space-y-3">
+        {selectedStrengths.map((selectedStrengthId, index) => {
+          const RankIcon = rankIcons[index]
+          const availableStrengths = getAvailableStrengths(index)
+          const strengthData = selectedStrengthId ? getStrengthById(selectedStrengthId) : null
+          const domainInfo = strengthData ? getDomainConfig(strengthData.domain.name) : null
 
-              return (
-                <div key={index} className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
-                  <div className="flex items-center gap-3 min-w-[140px]">
-                    <RankIcon 
-                      className={cn(
-                        "h-6 w-6",
-                        index === 0 ? "text-yellow-600" : 
-                        index === 1 ? "text-gray-500" : 
-                        "text-orange-600"
-                      )} 
-                    />
-                    <span className="font-medium">{rankLabels[index]}</span>
+          return (
+            <Card
+              key={index}
+              className={cn(
+                "border-border bg-card transition-all duration-200",
+                strengthData && "ring-1 ring-primary/20",
+              )}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  {/* Compact Rank Section */}
+                  <div className="flex items-center gap-2 min-w-[80px]">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      <RankIcon className="h-4 w-4" />
+                    </div>
+                    <div className="text-sm font-medium">{rankLabels[index]}</div>
                   </div>
 
-                  <div className="flex-1">
+                  {/* Selection Area */}
+                  <div className="flex-1 space-y-2">
                     <Select
                       value={selectedStrengthId || ""}
                       onValueChange={(value) => handleStrengthSelect(index, value)}
                       disabled={disabled}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Selecciona una fortaleza..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="max-h-60">
                         {availableStrengths.map((strength) => {
-                          const domainConfig = getDomainConfig(strength.domain.name);
-                          const DomainIcon = domainConfig.icon;
-
+                          const domainConfig = getDomainConfig(strength.domain.name)
+                          const DomainIcon = domainConfig.icon
                           return (
-                            <SelectItem
-                              key={strength.id}
-                              value={strength.id}
-                            >
-                              <div className="flex items-start gap-3 w-full py-2">
+                            <SelectItem key={strength.id} value={strength.id} className="p-3 cursor-pointer">
+                              <div className="flex items-center gap-2 w-full">
                                 <div className={cn("p-1 rounded", domainConfig.color)}>
-                                  <DomainIcon className="w-4 h-4 text-white" />
+                                  <DomainIcon className="w-3 h-3 text-white" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium">{strength.nameEs || strength.name}</div>
-                                  <div className="text-xs text-muted-foreground">{strength.name} • {strength.domain.nameEs || strength.domain.name}</div>
-                                  {strength.briefDefinition && (
-                                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                      {strength.briefDefinition}
-                                    </div>
-                                  )}
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm">{strength.nameEs || strength.name}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {strength.domain.nameEs || strength.domain.name}
+                                  </div>
                                 </div>
                               </div>
                             </SelectItem>
-                          );
+                          )
                         })}
                       </SelectContent>
                     </Select>
-                  </div>
 
-                  {strengthData && domainInfo && (
-                    <div className="flex items-center gap-2">
-                      <Badge className={cn(domainInfo.color, "text-white")}>
-                        {strengthData.domain.name}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {selectedCount === 5 && (
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-              <CardContent className="p-4">
-                <h3 className="text-green-800 dark:text-green-200 font-bold text-lg mb-3 flex items-center gap-2">
-                  <Trophy className="h-5 w-5" />
-                  ¡Perfecto! Has seleccionado tus TOP 5 Fortalezas
-                </h3>
-                <div className="space-y-2">
-                  {selectedStrengths.map((strengthId, index) => {
-                    if (!strengthId) return null;
-                    const strengthData = getStrengthById(strengthId);
-                    if (!strengthData) return null;
-
-                    const domainInfo = getDomainConfig(strengthData.domain.name);
-                    const RankIcon = rankIcons[index];
-
-                    return (
-                      <div key={index} className="flex items-center gap-3 text-green-800 dark:text-green-200">
-                        <RankIcon className="w-5 h-5 text-yellow-600" />
-                        <span className="font-medium">{index + 1}.</span>
-                        <span className="font-medium">{strengthData.strength.nameEs || strengthData.strength.name}</span>
-                        <span className="text-sm text-muted-foreground">({strengthData.strength.name})</span>
-                        <Badge className={cn(domainInfo.color, "text-white text-xs")}>
-                          {strengthData.domain.name}
-                        </Badge>
+                    {/* Compact Selected Strength Preview */}
+                    {strengthData && domainInfo && (
+                      <div className={cn("rounded-lg border p-3", domainInfo.lightColor, domainInfo.borderColor)}>
+                        <div className="flex items-start gap-2">
+                          <div className={cn("p-1 rounded", domainInfo.color)}>
+                            <domainInfo.icon className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-sm truncate">
+                                {strengthData.strength.nameEs || strengthData.strength.name}
+                              </h4>
+                              <Badge variant="secondary" className="text-xs">
+                                {strengthData.domain.nameEs || strengthData.domain.name}
+                              </Badge>
+                            </div>
+                            {strengthData.strength.briefDefinition && (
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {strengthData.strength.briefDefinition}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          )
+        })}
+      </div>
 
-          {/* Domain Information Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            {domains.map((domain) => {
-              const config = getDomainConfig(domain.name);
-              const DomainIcon = config.icon;
-              
-              return (
-                <Card key={domain.id} className="bg-muted/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={cn("p-2 rounded", config.color)}>
-                        <DomainIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold">{domain.nameEs || domain.name}</h4>
-                        <p className="text-xs text-muted-foreground">{domain.name}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {domain.summary || domain.description}
-                    </p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <Badge variant="outline" className={cn(config.textColor, config.borderColor, "text-xs")}>
-                        {domain.strengths.length} fortalezas
-                      </Badge>
-                      {domain.metaphor && (
-                        <Badge variant="secondary" className="text-xs">
-                          {domain.metaphor}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+      {/* Success Message */}
+      {selectedCount === 5 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <span className="font-semibold text-primary">¡Perfil completo!</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {selectedStrengths.map((strengthId, index) => {
+                if (!strengthId) return null
+                const strengthData = getStrengthById(strengthId)
+                if (!strengthData) return null
+                return (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    #{index + 1} {strengthData.strength.nameEs || strengthData.strength.name}
+                  </Badge>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Compact Domain Information */}
+      <Card className="border-border bg-card">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Dominios de Fortalezas</CardTitle>
+            <Button variant="ghost" size="sm" onClick={() => setShowDomainInfo(!showDomainInfo)} className="h-8 px-2">
+              <ChevronDown className={cn("w-4 h-4 transition-transform", showDomainInfo && "rotate-180")} />
+            </Button>
           </div>
-        </CardContent>
+        </CardHeader>
+        {showDomainInfo && (
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 gap-3">
+              {domains.map((domain) => {
+                const config = getDomainConfig(domain.name)
+                const DomainIcon = config.icon
+                const selectedFromDomain = selectedStrengths.filter((strengthId) => {
+                  if (!strengthId) return false
+                  const strengthData = getStrengthById(strengthId)
+                  return strengthData?.domain.id === domain.id
+                }).length
+
+                return (
+                  <div
+                    key={domain.id}
+                    className={cn(
+                      "p-3 rounded-lg border transition-all",
+                      config.lightColor,
+                      config.borderColor,
+                      selectedFromDomain > 0 && "ring-1 ring-primary/30",
+                    )}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={cn("p-1 rounded", config.color)}>
+                        <DomainIcon className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm truncate">{domain.nameEs || domain.name}</h4>
+                        {selectedFromDomain > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {selectedFromDomain}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{domain.summary || domain.description}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {/* Hidden inputs for form submission */}
       {selectedStrengths.map((strengthId, index) => {
-        if (!strengthId) return null;
+        if (!strengthId) return null
         return (
           <div key={strengthId}>
-            <input
-              type="hidden"
-              name={`${name}[${index}].strengthId`}
-              value={strengthId}
-            />
-            <input
-              type="hidden"
-              name={`${name}[${index}].position`}
-              value={index + 1}
-            />
+            <input type="hidden" name={`${name}[${index}].strengthId`} value={strengthId} />
+            <input type="hidden" name={`${name}[${index}].position`} value={index + 1} />
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
