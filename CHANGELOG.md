@@ -149,3 +149,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prisma migration: `add_name_es_to_strength_optional` applied successfully.
 - All seed and UI changes validated with type checks and tests.
 - No breaking changes for existing data; `nameEs` is optional for backward compatibility.
+
+#### Enhanced Profile Views with Enriched Domain Data (2025-07-31)
+
+**Database and Data Management**
+- Updated seeder to use enriched domain data from `mocks/domains-data.ts`
+- Populated Domain model with new enriched fields:
+  - `nameEs`: Spanish name for domains
+  - `metaphor`: Metaphorical description (e.g., "El Motor del Equipo")
+  - `keyQuestion`: Key question each domain answers
+  - `summary`: Detailed summary of the domain's purpose
+  - `contributionToTeam`: Array of team contributions
+  - `potentialPitfall`: Common pitfalls for each domain
+- Executed database migration and reset to apply schema changes
+- Created comprehensive test suite for domain data validation
+
+**UI Components Enhancement**
+- Created new `DomainCard` component to display enriched domain information
+- Updated `StrengthsDisplay` component:
+  - Shows Spanish names (nameEs) and full definitions
+  - Added expandable sections for complete strength definitions
+  - Displays strength dynamics and enhanced descriptions
+  - Improved visual hierarchy and information density
+- Enhanced `StrengthRankingSelector` component:
+  - Shows brief definitions in strength selection dropdown
+  - Displays Spanish names and metaphors for domains
+  - Improved domain information cards with enriched data
+  - Better visual feedback for selected strengths
+
+**Profile Views Improvement**
+- Updated Profile View page (`/dashboard/profile/view`):
+  - Added comprehensive domains overview section
+  - Shows user's strength distribution across domains
+  - Displays enriched domain information with metaphors and summaries
+  - Improved visual layout with better information hierarchy
+- Enhanced Profile Edit page:
+  - Better strength selection experience with enriched data
+  - Improved domain context during strength selection
+
+**Data Architecture**
+- Centralized all domain data in typed TypeScript mocks
+- Maintained relational integrity between domains and strengths
+- Added comprehensive domain metadata for analytics and UI enhancement
+- Created validation tests for data structure consistency

@@ -187,13 +187,18 @@ export function StrengthRankingSelector({
                               key={strength.id}
                               value={strength.id}
                             >
-                              <div className="flex items-center gap-3 w-full">
+                              <div className="flex items-start gap-3 w-full py-2">
                                 <div className={cn("p-1 rounded", domainConfig.color)}>
                                   <DomainIcon className="w-4 h-4 text-white" />
                                 </div>
-                                <div className="flex-1">
-                                  <div className="font-medium">{strength.name} / {strength.nameEs}</div>
-                                  <div className="text-xs text-muted-foreground">{strength.domain.name}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium">{strength.nameEs || strength.name}</div>
+                                  <div className="text-xs text-muted-foreground">{strength.name} • {strength.domain.nameEs || strength.domain.name}</div>
+                                  {strength.briefDefinition && (
+                                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                      {strength.briefDefinition}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </SelectItem>
@@ -235,7 +240,8 @@ export function StrengthRankingSelector({
                       <div key={index} className="flex items-center gap-3 text-green-800 dark:text-green-200">
                         <RankIcon className="w-5 h-5 text-yellow-600" />
                         <span className="font-medium">{index + 1}.</span>
-                        <span className="font-medium">{strengthData.strength.name} / {strengthData.strength.nameEs}</span>
+                        <span className="font-medium">{strengthData.strength.nameEs || strengthData.strength.name}</span>
+                        <span className="text-sm text-muted-foreground">({strengthData.strength.name})</span>
                         <Badge className={cn(domainInfo.color, "text-white text-xs")}>
                           {strengthData.domain.name}
                         </Badge>
@@ -260,15 +266,23 @@ export function StrengthRankingSelector({
                       <div className={cn("p-2 rounded", config.color)}>
                         <DomainIcon className="w-5 h-5 text-white" />
                       </div>
-                      <h4 className="font-bold">{domain.name}</h4>
+                      <div>
+                        <h4 className="font-bold">{domain.nameEs || domain.name}</h4>
+                        <p className="text-xs text-muted-foreground">{domain.name}</p>
+                      </div>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-3">
-                      {domain.description}
+                      {domain.summary || domain.description}
                     </p>
-                    <div className="mt-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <Badge variant="outline" className={cn(config.textColor, config.borderColor, "text-xs")}>
                         {domain.strengths.length} fortalezas
                       </Badge>
+                      {domain.metaphor && (
+                        <Badge variant="secondary" className="text-xs">
+                          {domain.metaphor}
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

@@ -124,16 +124,36 @@ export function StrengthsDisplay({ user, className }: StrengthsDisplayProps) {
                         domainColors[strength.domain.name as keyof typeof domainColors]
                       )}
                     >
-                      {strength.domain.name}
+                      {strength.domain.nameEs || strength.domain.name}
                     </Badge>
                     <h4 className="font-semibold text-lg text-foreground">
-                      {strength.name} / {strength.nameEs}
+                      {strength.nameEs} ({strength.name})
                     </h4>
                   </div>
                   
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {strength.description}
+                    {strength.briefDefinition || strength.description}
                   </p>
+
+                  {strength.fullDefinition && (
+                    <details className="text-sm">
+                      <summary className="cursor-pointer text-primary hover:text-primary/80 font-medium">
+                        Ver definición completa
+                      </summary>
+                      <p className="mt-2 text-muted-foreground leading-relaxed pl-4 border-l-2 border-primary/20">
+                        {strength.fullDefinition}
+                      </p>
+                    </details>
+                  )}
+
+                  {strength.strengthsDynamics && (
+                    <div className="bg-muted/50 p-3 rounded-md">
+                      <h5 className="font-medium text-sm text-foreground mb-1">Dinámicas:</h5>
+                      <p className="text-xs text-muted-foreground">
+                        {strength.strengthsDynamics}
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="text-xs text-muted-foreground font-medium">
                     {positionLabel}

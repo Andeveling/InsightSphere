@@ -4,10 +4,11 @@ import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/layout/page-header";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { StrengthsDisplay } from "@/components/profile/strengths-display";
+import { DomainCard } from "@/components/profile/domain-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Calendar, Briefcase, Heart, FileText, Edit } from "lucide-react";
+import { User, Calendar, Briefcase, Heart, FileText, Edit, Brain } from "lucide-react";
 import Link from "next/link";
 
 export default async function ProfileViewPage() {
@@ -37,6 +38,21 @@ export default async function ProfileViewPage() {
   if (!user) {
     redirect("/auth/signin");
   }
+
+  // Get all domains for the overview section
+  const domains = await prisma.domain.findMany({
+    include: {
+      strengths: true
+    },
+    orderBy: { name: 'asc' }
+  });
+
+  // Calculate user's strength distribution by domain
+  const userDomainCounts = user.userStrengths.reduce((acc, userStrength) => {
+    const domainName = userStrength.strength.domain.name;
+    acc[domainName] = (acc[domainName] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   const breadcrumbItems = [
     { label: "Perfil", href: "/dashboard/profile" },
@@ -154,6 +170,29 @@ export default async function ProfileViewPage() {
           <StrengthsDisplay user={user} />
         </div>
       </div>
+
+      {/* Domains Overview */}
+      {user.userStrengths.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Comprende los Dominios HIGH5</h2>
+            <p className="text-sm text-muted-foreground ml-2">
+              Explora los 4 dominios que definen las fortalezas humanas
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {domains.map((domain) => (
+              <DomainCard 
+                key={domain.id} 
+                domain={domain}
+                strengthsCount={userDomainCounts[domain.name] || 0}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {!user.profileComplete && (
         <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/10">

@@ -31,7 +31,7 @@ export default async function ProfileEditPage() {
     redirect("/auth/signin");
   }
 
-  // Get all domains with their strengths
+  // Get all domains with their strengths and enriched data
   const domains = await prisma.domain.findMany({
     include: {
       strengths: {
