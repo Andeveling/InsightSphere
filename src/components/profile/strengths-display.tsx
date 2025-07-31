@@ -151,7 +151,7 @@ export function StrengthsDisplay({ user, className }: StrengthsDisplayProps) {
 
       <CardContent className="space-y-6">
         {/* Strengths Grid - Responsive Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-5 gap-4">
           {sortedStrengths.map((userStrength, index) => {
             const { strength } = userStrength
             const position = userStrength.position || index + 1

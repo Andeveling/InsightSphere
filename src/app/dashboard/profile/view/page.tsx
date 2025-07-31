@@ -1,16 +1,15 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/layout/page-header";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { StrengthsDisplay } from "@/components/profile/strengths-display";
 import { DomainCard } from "@/components/profile/domain-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { StrengthsDisplay } from "@/components/profile/strengths-display";
+import { StrengthsRadarChart } from "@/components/profile/strengths-radar-chart";
 import { Badge } from "@/components/ui/badge";
-import { User, Calendar, Briefcase, Heart, FileText, Edit, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/lib/db";
+import { Brain, Briefcase, Calendar, Edit, FileText, Heart, User } from "lucide-react";
 import Link from "next/link";
-import { StrengthsOverview } from "@/components/profile/strengths-overview";
+import { redirect } from "next/navigation";
 
 export default async function ProfileViewPage() {
   const session = await auth();
@@ -71,9 +70,9 @@ export default async function ProfileViewPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-4">
         {/* Personal Information */}
-        <div className="space-y-4 col-span-4">
+        <div className="space-y-4 col-span-4 max-sm:col-span-12">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -161,7 +160,9 @@ export default async function ProfileViewPage() {
             </Card>
           )}
         </div>
-          <StrengthsOverview user={user} className="col-span-8" />
+            <StrengthsRadarChart user={user} className="col-span-8" />
+      <StrengthsDisplay user={user} className="col-span-12" />
+
       </div>
 
       {/* Domains Overview */}
