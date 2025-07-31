@@ -119,7 +119,7 @@ export function StrengthsRadarChart({ user, className, showInsights = true }: St
     return (
       <Card className={cn("border-border bg-card", className)}>
         <CardHeader className="text-center pb-4">
-          <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+          <div className="mx-auto w-12 h-12 bg-muted rounded-xl flex items-center justify-center mb-3 shadow-sm">
             <BarChart3 className="h-6 w-6 text-muted-foreground" />
           </div>
           <CardTitle className="text-lg">Radar de Fortalezas</CardTitle>
@@ -142,8 +142,8 @@ export function StrengthsRadarChart({ user, className, showInsights = true }: St
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-primary-foreground" />
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+              <BarChart3 className="h-5 w-5 text-white" />
             </div>
             <div>
               <CardTitle className="text-lg">Radar de Fortalezas</CardTitle>

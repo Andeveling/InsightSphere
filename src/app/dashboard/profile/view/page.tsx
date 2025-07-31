@@ -70,9 +70,9 @@ export default async function ProfileViewPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* Personal Information */}
-        <div className="space-y-4 col-span-4 max-sm:col-span-12">
+        <div className="space-y-4 lg:col-span-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -160,9 +160,16 @@ export default async function ProfileViewPage() {
             </Card>
           )}
         </div>
-            <StrengthsRadarChart user={user} className="col-span-8" />
-      <StrengthsDisplay user={user} className="col-span-12" />
 
+        {/* Radar Chart */}
+        <div className="lg:col-span-8">
+          <StrengthsRadarChart user={user} />
+        </div>
+
+        {/* Strengths Display - Full width on all screens */}
+        <div className="lg:col-span-12">
+          <StrengthsDisplay user={user} />
+        </div>
       </div>
 
       {/* Domains Overview */}
