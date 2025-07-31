@@ -1,100 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import * as fs from 'fs'
-import * as path from 'path'
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { StrengthProfile, strengthsData } from '../mocks/stregths-data';
+import domainsData from '../mocks/domains-data';
 
-// Interfaces para los datos detallados de las fortalezas
-interface EnhancedStrengthData {
-  strength: string;
-  nameEs: string;
-  domain: string;
-  briefDefinition: string;
-  details: {
-    fullDefinition?: string;
-    howToUseMoreEffectively?: string[];
-    watchOuts?: string[];
-    strengthsDynamics?: string;
-    bestPartners?: string[];
-    careerApplications?: string[];
-  };
-}
-
-interface StrengthData {
-  name: string;
-  nameEs: string;
-  domain: string;
-  description: string;
-}
-
-// Utilizamos tipos genéricos para facilitar el trabajo con los tipos de Prisma
-interface CreateStrengthData {
-  name: string;
-  nameEs: string;
-  description: string;
-  domainId: string;
-  briefDefinition?: string;
-  fullDefinition?: string;
-  howToUseMoreEffectively?: string;
-  watchOuts?: string;
-  strengthsDynamics?: string;
-  bestPartners?: any;
-  careerApplications?: any;
-}
 
 const prisma = new PrismaClient()
 
-// Datos oficiales HIGH5 con clasificación correcta
-const domainsData = [
-  {
-    name: "Doing",
-    description: "Este dominio agrupa las fortalezas relacionadas con la acción, la ejecución y la forma en que las personas hacen las cosas y logran que se realicen."
-  },
-  {
-    name: "Feeling",
-    description: "Este dominio se centra en las fortalezas interpersonales, la conciencia emocional y la forma en que las personas se conectan y relacionan con los demás."
-  },
-  {
-    name: "Motivating",
-    description: "Este dominio incluye las fortalezas que ayudan a las personas a inspirar y persuadir a otros, a tomar la iniciativa y a impulsar a los equipos hacia adelante."
-  },
-  {
-    name: "Thinking",
-    description: "Este dominio abarca las fortalezas relacionadas con la cognición, la creatividad, la resolución de problemas y la forma en que las personas procesan la información."
-  }
-]
-
-// Clasificación correcta oficial HIGH5 - 20 fortalezas, 4 dominios
-const strengthsData = [
-  // DOING DOMAIN (5 fortalezas)
-  { name: "Deliverer", nameEs: "Cumplidor", domain: "Doing", description: "Cumplen con sus compromisos y disfrutan viendo cómo esto genera más confianza y respeto entre los demás. Se sienten fatal si las promesas se rompen, tanto al recibirlas como al darlas." },
-  { name: "Focus Expert", nameEs: "Experto en Enfoque", domain: "Doing", description: "Las personas con esta fortaleza son expertas en establecer y mantener la concentración en una dirección u objetivo específico, evitando distracciones para lograr resultados." },
-  { name: "Problem Solver", nameEs: "Solucionador de Problemas", domain: "Doing", description: "Les encanta encontrar errores, descubrir fallas, diagnosticar problemas y encontrar soluciones. Les resulta difícil barrer los problemas debajo de la alfombra y seguir adelante ignorando los problemas sin resolver." },
-  { name: "Time Keeper", nameEs: "Guardián del Tiempo", domain: "Doing", description: "Son eficientes y puntuales, y se aseguran de que las cosas se hagan a tiempo. Valoran la puntualidad y la gestión eficaz del tiempo para cumplir con los plazos y los objetivos." },
-  { name: "Analyst", nameEs: "Analista", domain: "Doing", description: "Las personas con esta fortaleza se sienten energizadas al buscar la simplicidad y la claridad a través de una gran cantidad de datos. Se frustran cuando se les pide que sigan su corazón en lugar de la lógica y los hechos probados." },
-
-  // FEELING DOMAIN (5 fortalezas)
-  { name: "Believer", nameEs: "Creyente", domain: "Feeling", description: "Las acciones de estas personas están impulsadas por valores fundamentales y superiores que no pueden comprometerse a expensas del éxito. Se sienten agotados si sus creencias y valores son cuestionados o no están alineados con lo que tienen que hacer." },
-  { name: "Chameleon", nameEs: "Camaleón", domain: "Feeling", description: "Obtienen entusiasmo de los entornos en constante cambio, las sorpresas, los desvíos inesperados y el trabajo 'sobre la marcha'. La previsibilidad y la rutina les aburren hasta las lágrimas." },
-  { name: "Coach", nameEs: "Entrenador", domain: "Feeling", description: "Disfrutan descubriendo el potencial de otras personas y apoyando su crecimiento personal. Les resulta difícil aceptar que este potencial se desperdicie." },
-  { name: "Empathizer", nameEs: "Empatizador", domain: "Feeling", description: "Son excelentes para darse cuenta de cómo se sienten los demás y utilizar esta comprensión para hacer algo bueno. Se frustran cuando se les pide que ignoren los sentimientos y las emociones y que sigan una lógica estricta." },
-  { name: "Optimist", nameEs: "Optimista", domain: "Feeling", description: "Su misión es aportar un espíritu positivo. Creen que el vaso está medio lleno en lugar de medio vacío. Siempre encuentran la manera de hacer las cosas más emocionantes, ya sea un proyecto de trabajo o una situación cotidiana." },
-
-  // MOTIVATING DOMAIN (5 fortalezas)
-  { name: "Catalyst", nameEs: "Catalizador", domain: "Motivating", description: "Disfrutan de poner las cosas en marcha y de crear un impulso en un entorno estancado. No soportan esperar y perder el tiempo cuando podrían estar haciendo que las cosas despeguen." },
-  { name: "Commander", nameEs: "Comandante", domain: "Motivating", description: "Les encanta estar a cargo, hablar y que se les pida una opinión directa. No evitan los conflictos y no pueden entender la mentalidad de 'andarse con rodeos'." },
-  { name: "Self-believer", nameEs: "Autoconfiante", domain: "Motivating", description: "Son personas independientes y autosuficientes, que inspiran a otros con su certeza y confianza. No soportan que otros les digan qué hacer o controlen sus acciones." },
-  { name: "Storyteller", nameEs: "Narrador", domain: "Motivating", description: "Son maestros de la comunicación. Les gusta ser anfitriones, hablar en público y ser escuchados. Utilizan las historias para conectar, inspirar e influir en los demás." },
-  { name: "Winner", nameEs: "Ganador", domain: "Motivating", description: "Su objetivo es competir con otros para ganar. En su mente, solo los perdedores creen que participar es más importante que ganar. Las competiciones se crean para seleccionar a un único ganador porque, al final, los resultados son una comparación medida con los demás." },
-
-  // THINKING DOMAIN (5 fortalezas)
-  { name: "Brainstormer", nameEs: "Generador de Ideas", domain: "Thinking", description: "Estas personas se emocionan cuando se les pide que presenten nuevas ideas sin límites y que conecten cosas aparentemente inconexas. Se aburren rápidamente con las prácticas estándar o las personas de mente cerrada." },
-  { name: "Philomath", nameEs: "Filomato", domain: "Thinking", description: "Les encanta aprender, adquirir conocimientos y buscar la verdad. Sienten una profunda curiosidad y un deseo de entender el mundo que les rodea." },
-  { name: "Strategist", nameEs: "Estratega", domain: "Thinking", description: "Son capaces de ver el panorama general y de identificar patrones donde otros ven complejidad. Disfrutan creando planes y estrategias para navegar hacia un futuro deseado." },
-  { name: "Thinker", nameEs: "Pensador", domain: "Thinking", description: "Su objetivo es pensar. A algunos les emociona ejercitar sus bíceps y tríceps, pero ellos prefieren estirar sus 'músculos cerebrales' a través del pensamiento profundo. Disfrutan de la actividad mental y de las conversaciones significativas." },
-  { name: "Peace Keeper", nameEs: "Pacificador", domain: "Thinking", description: "Buscan la armonía y la resolución pacífica de conflictos. Se esfuerzan por encontrar un terreno común y unir a las personas, creando un ambiente de colaboración y entendimiento." }
-]
-
-// Datos de equipos de ejemplo
 const teamsData = [
   {
     name: "Team Alpha",
@@ -234,108 +145,50 @@ async function main() {
   await prisma.team.deleteMany({})
   await prisma.gameSession.deleteMany({})
 
-  // Crear dominios
+  // Crear dominios usando los datos enriquecidos (sin strengthsInDomain)
   console.log('📁 Creando dominios...')
   const createdDomains = await Promise.all(
     domainsData.map(async (domain) => {
       return await prisma.domain.create({
-        data: domain
+        data: {
+          name: domain.name,
+          nameEs: domain.nameEs,
+          description: domain.description,
+          metaphor: domain.metaphor,
+          keyQuestion: domain.keyQuestion,
+          summary: domain.summary,
+          contributionToTeam: domain.contributionToTeam,
+          potentialPitfall: domain.potentialPitfall,
+        }
       })
     })
   )
-  console.log(`✅ Creados ${createdDomains.length} dominios`)
+  console.log(`✅ Creados ${createdDomains.length} dominios enriquecidos`)
 
-  // Importar y procesar los datos del archivo example.js
-  console.log('📚 Importando datos detallados de fortalezas...')
-  
-  let enhancedStrengthsData: EnhancedStrengthData[] = [];
-  try {
-    const exampleFilePath = path.join(__dirname, 'example.js');
-    const exampleDataContent = fs.readFileSync(exampleFilePath, 'utf8');
-    
-    // Reemplazamos los comentarios y hacemos una conversión segura
-    // En lugar de usar eval(), utilizamos JSON.parse con algunas transformaciones
-    // para hacer que el formato JS sea compatible con JSON
-    const cleanedContent = exampleDataContent
-      .replace(/\/\/.*$/gm, '')               // Eliminar comentarios de una línea
-      .replace(/\/\*[\s\S]*?\*\//g, '')       // Eliminar comentarios multi-línea
-      .replace(/^\s*\[/, '[')                 // Asegurar que comienza con un corchete
-      .replace(/\]\s*$/, ']')                 // Asegurar que termina con un corchete
-      .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Convertir propiedades a formato JSON
-      .replace(/'/g, '"');                    // Convertir comillas simples a dobles
-
-    try {
-      enhancedStrengthsData = JSON.parse(cleanedContent) as EnhancedStrengthData[];
-      console.log(`✅ Datos detallados importados correctamente: ${enhancedStrengthsData.length} fortalezas con perfiles enriquecidos`);
-    } catch (jsonError) {
-      console.error('❌ Error al parsear JSON:', jsonError);
-      console.warn('⚠️ Intentando cargar con método alternativo...');
-
-      // Método de respaldo usando Function constructor (más seguro que eval pero aún no ideal)
-      try {
-        const safeEval = new Function('return ' + exampleDataContent)();
-        enhancedStrengthsData = safeEval as EnhancedStrengthData[];
-        console.log(`✅ Datos detallados importados con método alternativo: ${enhancedStrengthsData.length} fortalezas`);
-      } catch (evalError) {
-        console.error('❌ Error en método alternativo:', evalError);
-        console.log('⚠️ Continuando con datos básicos...');
-      }
-    }
-  } catch (fileError) {
-    console.error('❌ Error al leer el archivo de datos detallados:', fileError);
-    console.log('⚠️ Continuando con datos básicos...');
-  }
-
-  // Crear fortalezas
+  // Crear fortalezas usando strengthsData del mock
   console.log('💪 Creando fortalezas...')
   const createdStrengths = await Promise.all(
-    strengthsData.map(async (strength) => {
+    strengthsData.map(async (strength: StrengthProfile) => {
       const domain = createdDomains.find(d => d.name === strength.domain)
       if (!domain) {
         throw new Error(`Domain ${strength.domain} not found`)
       }
-
-      // Buscar datos detallados en el archivo example.js
-      const enhancedData = enhancedStrengthsData.find(
-        (s: EnhancedStrengthData) => s.strength === strength.name && s.domain === strength.domain
-      );
-
-      // Preparar los datos para crear la fortaleza
-      const strengthData: CreateStrengthData = {
-        name: strength.name,
-        nameEs: strength.nameEs,
-        description: strength.description,
-        domainId: domain.id,
-      };
-
-      // Si encontramos datos detallados, los añadimos
-      if (enhancedData) {
-        strengthData.briefDefinition = enhancedData.briefDefinition || strength.description;
-        
-        if (enhancedData.details) {
-          strengthData.fullDefinition = enhancedData.details.fullDefinition;
-          // Manejar el caso donde howToUseMoreEffectively puede no existir
-          if (enhancedData.details.howToUseMoreEffectively && Array.isArray(enhancedData.details.howToUseMoreEffectively)) {
-            strengthData.howToUseMoreEffectively = enhancedData.details.howToUseMoreEffectively.join("\n");
-          } else {
-            // Usamos el formato por defecto si no existe
-            strengthData.howToUseMoreEffectively = "No hay consejos específicos disponibles para esta fortaleza.";
-          }
-          strengthData.watchOuts = enhancedData.details.watchOuts?.join("\n");
-          strengthData.strengthsDynamics = enhancedData.details.strengthsDynamics;
-          // Para campos JSON necesitamos convertirlos adecuadamente para Prisma
-          if (enhancedData.details.bestPartners) {
-            strengthData.bestPartners = enhancedData.details.bestPartners as any;
-          }
-          if (enhancedData.details.careerApplications) {
-            strengthData.careerApplications = enhancedData.details.careerApplications as any;
-          }
-        }
-      }
-
+      // Mapear campos del mock al modelo de Prisma
       return await prisma.strength.create({
-        data: strengthData
-      });
+        data: {
+          name: strength.strength,
+          nameEs: strength.nameEs,
+          description: strength.briefDefinition,
+          domainId: domain.id,
+          briefDefinition: strength.briefDefinition,
+          fullDefinition: strength.details.fullDefinition,
+          howToUseMoreEffectively: strength.details.howToUseMoreEffectively?.join('\n'),
+          watchOuts: strength.details.watchOuts?.join('\n'),
+          strengthsDynamics: strength.details.strengthsDynamics,
+          bestPartners: strength.details.bestPartners ?? [],
+          careerApplications: strength.details.careerApplications ?? [],
+        }
+      })
     })
   )
   console.log(`✅ Creadas ${createdStrengths.length} fortalezas con perfiles enriquecidos`)
