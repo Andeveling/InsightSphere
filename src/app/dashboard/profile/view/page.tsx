@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { DomainCard } from "@/components/profile/domain-card";
 import { StrengthsDisplay } from "@/components/profile/strengths-display";
-import { StrengthsRadarChart } from "@/components/profile/strengths-radar-chart";
+import { StrengthsDonutChart } from "@/components/profile/strengths-donut-chart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -163,7 +163,7 @@ export default async function ProfileViewPage() {
 
         {/* Radar Chart */}
         <div className="lg:col-span-8">
-          <StrengthsRadarChart user={user} />
+          <StrengthsDonutChart user={user} />
         </div>
 
         {/* Strengths Display - Full width on all screens */}
