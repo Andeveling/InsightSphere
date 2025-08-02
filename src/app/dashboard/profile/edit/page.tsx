@@ -1,8 +1,9 @@
+import { getAllDomainsWithStrengths } from "@/actions/strengths.actions";
+import { getUserWithStrengths } from "@/actions/user.actions";
 import { auth } from "@/auth";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Button } from "@/components/ui/button";
-import { prisma } from "@/lib/db";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -13,38 +14,13 @@ export default async function ProfileEditPage() {
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
+  
+  const userResult = await getUserWithStrengths()
+  const domainsResult = await getAllDomainsWithStrengths()
 
-  // Get user data with current strengths
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      userStrengths: {
-        include: {
-          strength: true
-        },
-        orderBy: { position: 'asc' }
-      }
-    }
-  });
-
-  if (!user) {
+  if (!userResult?.data || !domainsResult?.data) {
     redirect("/auth/signin");
   }
-
-  // Get all domains with their strengths and enriched data
-  const domains = await prisma.domain.findMany({
-    include: {
-      strengths: {
-        orderBy: { name: 'asc' }
-      }
-    },
-    orderBy: { name: 'asc' }
-  });
-
-  const breadcrumbItems = [
-    { label: "Perfil", href: "/dashboard/profile/view" },
-    { label: "Editar", current: true }
-  ];
 
   return (
     <div className="space-y-8">
@@ -60,7 +36,7 @@ export default async function ProfileEditPage() {
         </Button>
       </PageHeader>
 
-      <ProfileForm user={user} domains={domains} />
+      <ProfileForm user={userResult.data} domains={domainsResult.data} />
     </div>
   );
 }

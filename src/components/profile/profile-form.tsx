@@ -13,19 +13,18 @@ import { submitProfile } from "@/actions/profile.actions"
 import { toast } from "sonner"
 import { User, Calendar, Briefcase, Heart, FileText, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { ActionResponse } from "@/lib/validations/profile"
-import type { User as UserType, Strength, Domain, UserStrength } from "@prisma/client"
+import type { ActionResponse } from "@/lib/validations/profile.schema"
+import type { InferSafeActionFnResult } from "next-safe-action"
+import { getUserWithStrengths } from "@/actions/user.actions"
+import { getAllDomainsWithStrengths } from "@/actions/strengths.actions"
+
+// Tipos inferidos para las props
+export type UserWithStrengthsResult = InferSafeActionFnResult<typeof getUserWithStrengths>
+export type DomainsResult = InferSafeActionFnResult<typeof getAllDomainsWithStrengths>
 
 interface ProfileFormProps {
-  user: UserType & {
-    userStrengths: (UserStrength & {
-      strength: Strength
-    })[]
-  }
-  domains: (Domain & {
-    strengths: Strength[]
-  })[]
-  initialStrengthRankings?: Array<{ strengthId: string; position: number }>
+  user: UserWithStrengthsResult["data"]
+  domains: DomainsResult["data"]
 }
 
 const initialState: ActionResponse = {
@@ -33,36 +32,26 @@ const initialState: ActionResponse = {
   message: "",
 }
 
-export function ProfileForm({ user, domains, initialStrengthRankings }: ProfileFormProps) {
-  console.log("🔍 ProfileForm - initial load:", user)
-  console.log("🚀 ProfileForm - received initial rankings:", initialStrengthRankings)
+export function ProfileForm({ user, domains }: ProfileFormProps) {
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitProfile, initialState)
-  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number | null }>>(
-    initialStrengthRankings?.map((r) => ({ ...r, position: r.position ?? null })) || []
-  )
-
-  console.log("🚀 ProfileForm - strengthRankings state:", strengthRankings)
-  console.log("🔍 ProfileForm - user strengths:", user)
-
-  // Initialize strength rankings from user data
-  useEffect(() => {
-    if (user.userStrengths.length > 0) {
-      const rankings = user.userStrengths
-        .map((us) => ({
-          strengthId: us.strengthId,
-          position: us.position ?? null,
-        }))
-        .sort((a, b) => {
-          if (a.position == null && b.position != null) return 1
-          if (a.position != null && b.position == null) return -1
-          if (a.position == null && b.position == null) return 0
-          // Both are not null, safe to subtract
-          return (a.position as number) - (b.position as number)
-        })
-      setStrengthRankings(rankings)
-    }
-  }, [user.userStrengths])
+  
+  // Initialize strength rankings from user data - only for display purposes
+  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number | null }>>(() => {
+    if (!user?.userStrengths?.length) return []
+    
+    return user.userStrengths
+      .map((us) => ({
+        strengthId: us.strengthId,
+        position: us.position ?? null,
+      }))
+      .sort((a, b) => {
+        if (a.position == null && b.position != null) return 1
+        if (a.position != null && b.position == null) return -1
+        if (a.position == null && b.position == null) return 0
+        return (a.position as number) - (b.position as number)
+      })
+  })
 
   // Handle success state and redirects
   useEffect(() => {
@@ -78,9 +67,14 @@ export function ProfileForm({ user, domains, initialStrengthRankings }: ProfileF
     }
   }, [state, router])
 
+  // Early return if user or domains are not available
+  if (!user || !domains) {
+    return <div>Loading...</div>
+  }
+
   // Check if personal info is complete
   const isPersonalInfoComplete = user.age && user.career && user.hobbies && user.description
-  const isStrengthsComplete = strengthRankings.length === 5
+  const isStrengthsComplete = strengthRankings.filter(r => r.position !== null).length === 5
 
   return (
     <div className="min-h-screen bg-background">

@@ -9,7 +9,7 @@ import {
   isProfileComplete, 
   type ActionResponse,
   type ProfileFormData 
-} from "@/lib/validations/profile";
+} from "@/lib/validations/profile.schema";
 
 /**
  * Submit profile form using React 19 useActionState pattern

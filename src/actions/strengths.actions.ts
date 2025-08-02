@@ -1,6 +1,26 @@
 "use server";
 
+import { actionClient } from "./safe.actions";
 import { prisma } from "@/lib/db";
+
+/**
+ * Get all domains with their strengths for profile form
+ */
+export const getAllDomainsWithStrengths = actionClient.action(async () => {
+  const domains = await prisma.domain.findMany({
+    include: {
+      strengths: {
+        include: {
+          domain: true // Include domain info for each strength
+        },
+        orderBy: { name: 'asc' }
+      }
+    },
+    orderBy: { name: 'asc' }
+  });
+
+  return domains;
+});
 
 /**
  * Get all strengths organized by domain

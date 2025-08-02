@@ -289,7 +289,7 @@ export function StrengthRankingSelector({
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Dominios de Fortalezas</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setShowDomainInfo(!showDomainInfo)} className="h-8 px-2">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowDomainInfo(!showDomainInfo)} className="h-8 px-2">
               <ChevronDown className={cn("w-4 h-4 transition-transform", showDomainInfo && "rotate-180")} />
             </Button>
           </div>

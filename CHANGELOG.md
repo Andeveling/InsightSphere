@@ -191,3 +191,18 @@ All notable changes to this project will be documented in this file.
 - Maintained relational integrity between domains and strengths
 - Added comprehensive domain metadata for analytics and UI enhancement
 - Created validation tests for data structure consistency
+
+## [1.2.1] - 2025-08-02
+
+### Fixed
+- Corrige el mapeo de fortalezas en el formulario de perfil para incluir todas las fortalezas del usuario, incluso si alguna tiene posición nula.
+- Ajusta el filtrado y tipado de `selectedRankings` para evitar errores de tipo y asegurar que solo se envíen fortalezas válidas al selector.
+- Mejora la lógica de inicialización y renderizado para evitar inconsistencias en la selección y visualización de fortalezas.
+
+### Changed
+- Actualiza el tipado de props en ProfileForm para usar tipos inferidos de next-safe-action (`InferSafeActionFnResult`) en lugar de tipos directos de Prisma.
+- Simplifica la lógica de inicialización de fortalezas eliminando `useEffect` innecesario y props no utilizados.
+- Elimina logs de consola y lógica redundante para mejor rendimiento y mantenibilidad.
+- Agrega validación temprana para prevenir errores cuando el usuario no está disponible.
+- Crea nueva action `getAllDomainsWithStrengths` que devuelve dominios con fortalezas usando next-safe-action.
+- Refactoriza la página de edición de perfil para usar correctamente los resultados de las actions (`result.data`).
