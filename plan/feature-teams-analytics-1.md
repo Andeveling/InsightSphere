@@ -162,16 +162,25 @@ Este plan define la implementación completa del módulo de equipos para Insight
 - **TEST-002**: Utilidades de análisis de dominios HIGH5
 - **TEST-003**: Motor de complementariedad con casos edge
 - **TEST-004**: Componentes de visualización con datos mock
+- **TEST-005**: TDD para la vista de equipos (`TeamsPage`) usando Vitest. Escribir primero los tests unitarios para validar renderizado y props antes de implementar la lógica.
 
 ### Tests de Integración
-- **TEST-005**: Flujo completo de carga de dashboard de equipo
-- **TEST-006**: Interacciones entre componentes de visualización
-- **TEST-007**: Navegación entre páginas de equipos
+- **TEST-006**: Flujo completo de carga de dashboard de equipo
+- **TEST-007**: Interacciones entre componentes de visualización
+- **TEST-008**: Navegación entre páginas de equipos
+- **TEST-009**: TDD para la integración de la vista de equipos. Validar la interacción entre componentes y el flujo de datos usando Vitest.
 
 ### Tests E2E
-- **TEST-008**: Usuario navega y explora dashboard de su equipo
-- **TEST-009**: Análisis de insights y recomendaciones funciona correctamente
-- **TEST-010**: Responsive design en diferentes dispositivos
+- **TEST-010**: Usuario navega y explora dashboard de su equipo
+- **TEST-011**: Análisis de insights y recomendaciones funciona correctamente
+- **TEST-012**: Responsive design en diferentes dispositivos
+- **TEST-013**: TDD para la vista de equipos con Playwright. Escribir primero los tests E2E para validar el flujo de usuario en `/dashboard/teams` antes de implementar la UI completa.
+
+### Prácticas recomendadas TDD
+- Priorizar la escritura de tests antes de la implementación de componentes y páginas.
+- Ejecutar los tests continuamente con `pnpm test` (Vitest) y `npx playwright test` (Playwright) durante el desarrollo.
+- Refactorizar el código solo si los tests existentes siguen pasando.
+- Documentar los casos de prueba relevantes en el plan de implementación.
 
 ## 7. Risks & Assumptions
 
