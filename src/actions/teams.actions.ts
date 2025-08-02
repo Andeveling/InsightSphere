@@ -1,29 +1,56 @@
-// Server actions principales para equipos HIGH5
-// ...existing code...
-
 import { z } from "zod"
 import { actionClient } from "./action-client.actions"
+import { prisma } from "@/lib/db"
+import { TeamMemberSchema } from "@/schemas/teams.schema"
 
 const teamIdSchema = z.object({ teamId: z.string() })
 
 export const getTeamMembers = actionClient
   .inputSchema(teamIdSchema)
   .action(async ({ parsedInput }) => {
-    // Aquí iría la consulta real con Prisma
-    // Por ahora, datos mock
-    return [
-      { id: "1", name: "Juan", strengths: ["Coach", "Deliverer"], domain: "Motivating" },
-      { id: "2", name: "Ana", strengths: ["Commander", "Brainstormer"], domain: "Thinking" },
-      { id: "3", name: "Luis", strengths: ["Empathizer", "Deliverer"], domain: "Feeling" }
-    ]
+    const team = await prisma.team.findUnique({
+      where: { id: parsedInput.teamId },
+      include: {
+        users: {
+          include: {
+            userStrengths: {
+              include: {
+                strength: {
+                  include: { domain: true }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+    if (!team) return []
+    return team.users.map(user => ({
+      id: user.id,
+      name: user.name,
+      strengths: user.userStrengths.map(us => us.strength.name),
+      domain: user.userStrengths[0]?.strength.domain?.name ?? user.userStrengths[0]?.strength.domainId ?? ""
+    }))
   })
 
 export const getTeamStrengths = actionClient
   .inputSchema(teamIdSchema)
   .action(async ({ parsedInput }) => {
-    // Aquí iría la consulta real con Prisma
-    // Por ahora, datos mock
-    return ["Coach", "Deliverer", "Commander", "Brainstormer", "Empathizer"]
+    const team = await prisma.team.findUnique({
+      where: { id: parsedInput.teamId },
+      include: {
+        users: {
+          include: {
+            userStrengths: {
+              include: { strength: true }
+            }
+          }
+        }
+      }
+    })
+    if (!team) return []
+    const strengths = team.users.flatMap(user => user.userStrengths.map(us => us.strength.name))
+    return Array.from(new Set(strengths))
   })
 
 // Ejemplo de acción para obtener composición de equipo

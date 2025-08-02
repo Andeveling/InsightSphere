@@ -2,7 +2,6 @@
 import { z } from "zod"
 import { actionClient } from "./action-client.actions"
 import { getTeamMembers, getTeamStrengths } from "./teams.actions"
-import { TeamId, TeamComposition, TeamDomainAnalysis, TeamComplementarity, TeamInsights } from "@/schemas/teams.schema"
 import { analyzeTeamComposition, analyzeTeamDomains, analyzeComplementarity, generateTeamInsights } from "../lib/team-analysis"
 
 const teamIdSchema = z.object({ teamId: z.string() })
