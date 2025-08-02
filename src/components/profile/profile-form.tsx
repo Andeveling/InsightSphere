@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ErrorDisplay } from "@/components/ui/error-display"
 import { StrengthRankingSelector } from "@/components/profile/strength-ranking-selector"
-import { submitProfile } from "@/actions/profile"
+import { submitProfile } from "@/actions/profile.actions"
 import { toast } from "sonner"
 import { User, Calendar, Briefcase, Heart, FileText, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -38,20 +38,28 @@ export function ProfileForm({ user, domains, initialStrengthRankings }: ProfileF
   console.log("🚀 ProfileForm - received initial rankings:", initialStrengthRankings)
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitProfile, initialState)
-  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number }>>(
-    initialStrengthRankings || []
+  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number | null }>>(
+    initialStrengthRankings?.map((r) => ({ ...r, position: r.position ?? null })) || []
   )
+
+  console.log("🚀 ProfileForm - strengthRankings state:", strengthRankings)
+  console.log("🔍 ProfileForm - user strengths:", user)
 
   // Initialize strength rankings from user data
   useEffect(() => {
     if (user.userStrengths.length > 0) {
       const rankings = user.userStrengths
-        .filter((us) => us.position !== null)
         .map((us) => ({
           strengthId: us.strengthId,
-          position: us.position!,
+          position: us.position ?? null,
         }))
-        .sort((a, b) => a.position - b.position)
+        .sort((a, b) => {
+          if (a.position == null && b.position != null) return 1
+          if (a.position != null && b.position == null) return -1
+          if (a.position == null && b.position == null) return 0
+          // Both are not null, safe to subtract
+          return (a.position as number) - (b.position as number)
+        })
       setStrengthRankings(rankings)
     }
   }, [user.userStrengths])
@@ -246,7 +254,9 @@ export function ProfileForm({ user, domains, initialStrengthRankings }: ProfileF
           <div className="space-y-6">
             <StrengthRankingSelector
               domains={domains}
-              selectedRankings={strengthRankings}
+              selectedRankings={strengthRankings.filter((r): r is { strengthId: string; position: number } =>
+                typeof r.position === 'number' && r.position >= 1 && r.position <= 5
+              )}
               onChange={setStrengthRankings}
               disabled={isPending}
               name="strengthRankings"

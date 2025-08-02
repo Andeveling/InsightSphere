@@ -62,7 +62,8 @@ export function StrengthRankingSelector({
   disabled,
   name,
 }: StrengthRankingSelectorProps) {
-  const [showDomainInfo, setShowDomainInfo] = useState(false)
+  const [ showDomainInfo, setShowDomainInfo ] = useState(false)
+  console.log("Selected Rankings:", selectedRankings)
 
   // Calcular el estado inicial usando useMemo para estabilizar
   const initialStrengths = useMemo(() => {
