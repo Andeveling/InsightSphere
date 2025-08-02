@@ -5,18 +5,18 @@ import { auth } from "../../auth.config"
 
 export const getUserWithStrengths = actionClient.action(async () => {
   const session = await auth()
-const user = await prisma.user.findUnique({
-  where: { id: session?.user.id },
-  include: {
-    userStrengths: {
-      include: {
-        strength: true,
+  const user = await prisma.user.findUnique({
+    where: { id: session?.user.id },
+    include: {
+      team: true,
+      userStrengths: {
+        include: {
+          strength: true,
+        },
+        orderBy: { position: "asc" },
       },
-      orderBy: { position: "asc" },
     },
-  },
-})
-
+  })
   return user
 })
 

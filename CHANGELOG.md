@@ -138,7 +138,7 @@ All notable changes to this project will be documented in this file.
 - **Seed Update:** Updated `prisma/seed.ts` to populate Spanish names for all strengths.
 - **UI Localization:** All profile and strengths-related UI components now display both English and Spanish names for each strength (e.g., `Analyst / Analista`).
 - **TypeScript Types:** Updated types and props to support the new `nameEs` field throughout the app.
-- **Database Migration:** Applied migration to add the new field and re-seeded the database with bilingual data.
+- **Database Migration:** Applied migration to add the new field and re-seed the database with bilingual data.
 
 ### Changed
 - **Component Updates:** Modified all relevant components to show both names, ensuring Spanish-speaking teams can easily identify strengths.
@@ -213,3 +213,14 @@ All notable changes to this project will be documented in this file.
 - Remueve importaciones no utilizadas y optimiza el manejo de tipos para mejor performance.
 - Crea nueva action `getAllDomainsWithStrengths` que devuelve dominios con fortalezas usando next-safe-action.
 - Refactoriza la página de edición de perfil para usar correctamente los resultados de las actions (`result.data`).
+
+## [Unreleased]
+
+### Added
+- Componente `TeamCompositionChart` para visualizar la composición de fortalezas del equipo con gráfico circular interactivo usando Recharts y shadcn/ui.
+- Integración con server action `getTeamComposition` vía next-safe-action y hook seguro.
+- Visualización dinámica y responsiva de datos de fortalezas en el dashboard de equipos.
+
+### Changed
+- Refactor: Los componentes de visualización de equipos (`TeamCompositionChart`, `TeamMembersGrid`) ahora reciben los datos directamente como props desde el Server Component (`TeamsPage`), eliminando el prop drilling y las peticiones duplicadas.
+- Mejora de performance y arquitectura: Toda la lógica de obtención de datos se centraliza en el Server Component, permitiendo futuras estrategias de caché y mejorando la mantenibilidad.
