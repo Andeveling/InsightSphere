@@ -132,3 +132,4 @@ include: {
 - Each time you generate code, note the changes in the `CHANGELOG.md` file.
 - Follow semantic versioning guidelines.
 - Include date and description of changes.
+- Follow instructions in `.github/instructions/changelog.instructions.md` for consistency.
