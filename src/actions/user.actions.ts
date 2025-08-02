@@ -1,4 +1,4 @@
-import { actionClient } from "./safe.actions"
+import { actionClient } from "./action-client.actions"
 import { InferSafeActionFnResult } from "next-safe-action"
 import { prisma } from "../../lib/prisma"
 import { auth } from "../../auth.config"

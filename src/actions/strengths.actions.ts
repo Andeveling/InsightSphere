@@ -1,6 +1,6 @@
 "use server";
 
-import { actionClient } from "./safe.actions";
+import { actionClient } from "./action-client.actions";
 import { prisma } from "@/lib/db";
 import { InferSafeActionFnResult } from "next-safe-action"
 
