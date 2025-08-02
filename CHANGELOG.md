@@ -204,5 +204,8 @@ All notable changes to this project will be documented in this file.
 - Simplifica la lógica de inicialización de fortalezas eliminando `useEffect` innecesario y props no utilizados.
 - Elimina logs de consola y lógica redundante para mejor rendimiento y mantenibilidad.
 - Agrega validación temprana para prevenir errores cuando el usuario no está disponible.
+- Limpia lógicas de filtrado excesivas en las props de `StrengthRankingSelector`, moviendo la lógica de filtrado internamente al componente.
+- Simplifica la inicialización del estado en `StrengthRankingSelector` eliminando console.logs y debugging innecesario.
+- Remueve importaciones no utilizadas y optimiza el manejo de tipos para mejor performance.
 - Crea nueva action `getAllDomainsWithStrengths` que devuelve dominios con fortalezas usando next-safe-action.
 - Refactoriza la página de edición de perfil para usar correctamente los resultados de las actions (`result.data`).

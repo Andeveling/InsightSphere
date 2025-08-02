@@ -8,14 +8,13 @@ import { Button } from "@/components/ui/button"
 import { Trophy, Medal, Award, Target, Star, Brain, Heart, Zap, Cog, ChevronDown, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Domain, Strength } from "@prisma/client"
-import { debugRankings } from "../../../debug-utils"
 
 interface StrengthRankingSelectorProps {
   domains: (Domain & {
     strengths: Strength[]
   })[]
-  selectedRankings: { strengthId: string; position: number }[]
-  onChange: (rankings: { strengthId: string; position: number }[]) => void
+  selectedRankings: { strengthId: string; position: number | null }[]
+  onChange: (rankings: { strengthId: string; position: number | null }[]) => void
   disabled?: boolean
   name: string
 }
@@ -62,38 +61,24 @@ export function StrengthRankingSelector({
   disabled,
   name,
 }: StrengthRankingSelectorProps) {
-  const [ showDomainInfo, setShowDomainInfo ] = useState(false)
-  console.log("Selected Rankings:", selectedRankings)
+  const [showDomainInfo, setShowDomainInfo] = useState(false)
 
-  // Calcular el estado inicial usando useMemo para estabilizar
+  // Simplificar la inicialización del estado
   const initialStrengths = useMemo(() => {
-    debugRankings(selectedRankings, "StrengthRankingSelector - received props")
-    
-    if (selectedRankings.length === 0) {
-      return [null, null, null, null, null] as (string | null)[]
-    }
-
     const positions: (string | null)[] = [null, null, null, null, null]
     
-    selectedRankings.forEach((ranking) => {
-      console.log(`🔍 Processing ranking:`, ranking, `position type:`, typeof ranking.position)
-      const position = Number(ranking.position)
-      if (Number.isInteger(position) && position >= 1 && position <= 5) {
-        console.log(`✅ Setting position ${position} (index ${position - 1}) to strengthId:`, ranking.strengthId)
-        positions[position - 1] = ranking.strengthId
-      } else {
-        console.log(`❌ Position ${ranking.position} is out of range or invalid`)
-      }
-    })
+    selectedRankings
+      .filter(r => r.position && r.position >= 1 && r.position <= 5)
+      .forEach((ranking) => {
+        positions[ranking.position! - 1] = ranking.strengthId
+      })
     
-    console.log("🔍 Final positions array:", positions)
     return positions
   }, [selectedRankings])
 
-  // Estado con inicialización estable
   const [selectedStrengths, setSelectedStrengths] = useState<(string | null)[]>(initialStrengths)
 
-  // Sincronizar cuando cambie el valor estable
+  // Sincronizar cuando cambien los rankings externos
   useEffect(() => {
     setSelectedStrengths(initialStrengths)
   }, [initialStrengths])
@@ -124,8 +109,12 @@ export function StrengthRankingSelector({
     setSelectedStrengths(newSelected)
 
     const newRankings = newSelected
-      .map((strengthId, index) => (strengthId ? { strengthId, position: index + 1 } : null))
-      .filter(Boolean) as { strengthId: string; position: number }[]
+      .map((strengthId, index) => ({
+        strengthId: strengthId || '',
+        position: strengthId ? index + 1 : null,
+      }))
+      .filter(r => r.strengthId && r.position !== null) as { strengthId: string; position: number | null }[]
+    
     onChange(newRankings)
   }
 

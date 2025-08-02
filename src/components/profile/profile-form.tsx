@@ -18,7 +18,6 @@ import type { InferSafeActionFnResult } from "next-safe-action"
 import { getUserWithStrengths } from "@/actions/user.actions"
 import { getAllDomainsWithStrengths } from "@/actions/strengths.actions"
 
-// Tipos inferidos para las props
 export type UserWithStrengthsResult = InferSafeActionFnResult<typeof getUserWithStrengths>
 export type DomainsResult = InferSafeActionFnResult<typeof getAllDomainsWithStrengths>
 
@@ -36,7 +35,6 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitProfile, initialState)
   
-  // Initialize strength rankings from user data - only for display purposes
   const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number | null }>>(() => {
     if (!user?.userStrengths?.length) return []
     
@@ -248,9 +246,7 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
           <div className="space-y-6">
             <StrengthRankingSelector
               domains={domains}
-              selectedRankings={strengthRankings.filter((r): r is { strengthId: string; position: number } =>
-                typeof r.position === 'number' && r.position >= 1 && r.position <= 5
-              )}
+              selectedRankings={strengthRankings}
               onChange={setStrengthRankings}
               disabled={isPending}
               name="strengthRankings"

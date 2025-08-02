@@ -125,10 +125,6 @@ export function StrengthsDonutChart({ user, className, showInsights = true }: St
     item.percentage = totalStrengths > 0 ? Math.round((item.count / totalStrengths) * 100) : 0
   })
 
-  // Debug: Log chart data
-  console.log("Chart Data:", chartData)
-  console.log("Total Strengths:", totalStrengths)
-
   // All domain data for legend (including zeros)
   const allDomainsData = Object.entries(domainConfig).map(([domainName, config]) => ({
     domain: domainName,
