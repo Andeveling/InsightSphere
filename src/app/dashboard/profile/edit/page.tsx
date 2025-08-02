@@ -1,12 +1,11 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { ProfileForm } from "@/components/profile/profile-form";
 import { PageHeader } from "@/components/layout/page-header";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { ProfileForm } from "@/components/profile/profile-form";
 import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/db";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function ProfileEditPage() {
   const session = await auth();
