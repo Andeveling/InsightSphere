@@ -11,6 +11,7 @@ Este documento tiene como objetivo estandarizar la forma en que los agentes (des
 
 - Cada entrada debe estar agrupada por versión (ejemplo: `## [1.2.0] - 2025-08-02`).
 - Las versiones siguen el esquema [SemVer](https://semver.org/lang/es/) (MAJOR.MINOR.PATCH).
+- El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Los cambios deben clasificarse en categorías:
   - **Added** (Añadido)
   - **Changed** (Cambiado)
