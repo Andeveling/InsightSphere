@@ -2,6 +2,8 @@
 
 import { actionClient } from "./safe.actions";
 import { prisma } from "@/lib/db";
+import { InferSafeActionFnResult } from "next-safe-action"
+
 
 /**
  * Get all domains with their strengths for profile form
@@ -21,6 +23,8 @@ export const getAllDomainsWithStrengths = actionClient.action(async () => {
 
   return domains;
 });
+export type GetAllDomainsWithStrengthsResult = InferSafeActionFnResult<typeof getAllDomainsWithStrengths>;
+
 
 /**
  * Get all strengths organized by domain
@@ -56,6 +60,8 @@ export async function getStrengthsByDomain() {
     throw new Error("Error al obtener las fortalezas por dominio");
   }
 }
+
+
 
 /**
  * Get all strengths as a flat array
@@ -208,3 +214,5 @@ export async function getAllDomains() {
     throw new Error("Error al obtener todos los dominios");
   }
 }
+
+

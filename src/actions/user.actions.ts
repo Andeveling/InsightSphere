@@ -1,5 +1,5 @@
 import { actionClient } from "./safe.actions"
-import { returnValidationErrors } from "next-safe-action"
+import { InferSafeActionFnResult } from "next-safe-action"
 import { prisma } from "../../lib/prisma"
 import { auth } from "../../auth.config"
 
@@ -19,3 +19,5 @@ const user = await prisma.user.findUnique({
 
   return user
 })
+
+export type UserWithStrengthsResult = InferSafeActionFnResult<typeof getUserWithStrengths>
