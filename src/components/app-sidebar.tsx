@@ -20,7 +20,7 @@ export async function AppSidebar() {
   const items = [
     { title: "Dashboard", url: "/dashboard", icon: Home },
     ...(session?.user ? [{ title: "Perfil", url: "/dashboard/profile/view", icon: User }] : []),
-    { title: "Equipo", url: "/dashboard/team", icon: BarChart3 },
+    { title: "Equipo", url: "/dashboard/teams", icon: BarChart3 },
     { title: "Configuraciones", url: "/dashboard/settings", icon: Settings },
   ];
 
