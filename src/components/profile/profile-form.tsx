@@ -1,29 +1,27 @@
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { submitProfile } from "@/actions/profile.actions"
+import { StrengthRankingSelector } from "@/components/profile/strength-ranking-selector"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ErrorDisplay } from "@/components/ui/error-display"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ErrorDisplay } from "@/components/ui/error-display"
-import { StrengthRankingSelector } from "@/components/profile/strength-ranking-selector"
-import { submitProfile } from "@/actions/profile.actions"
-import { toast } from "sonner"
-import { User, Calendar, Briefcase, Heart, FileText, CheckCircle2 } from "lucide-react"
+import { useStrengthRankings } from "@/hooks/use-strength-rankings"
 import { cn } from "@/lib/utils"
 import type { ActionResponse } from "@/lib/validations/profile.schema"
-import type { InferSafeActionFnResult } from "next-safe-action"
-import { getUserWithStrengths } from "@/actions/user.actions"
-import { getAllDomainsWithStrengths } from "@/actions/strengths.actions"
+import { Briefcase, Calendar, CheckCircle2, FileText, Heart, User } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useActionState, useEffect } from "react"
+import { toast } from "sonner"
 
-export type UserWithStrengthsResult = InferSafeActionFnResult<typeof getUserWithStrengths>
-export type DomainsResult = InferSafeActionFnResult<typeof getAllDomainsWithStrengths>
+import type { GetAllDomainsWithStrengthsResult } from "@/actions/strengths.actions"
+import type { UserWithStrengthsResult } from "@/actions/user.actions"
 
 interface ProfileFormProps {
   user: UserWithStrengthsResult["data"]
-  domains: DomainsResult["data"]
+  domains: GetAllDomainsWithStrengthsResult["data"]
 }
 
 const initialState: ActionResponse = {
@@ -34,22 +32,7 @@ const initialState: ActionResponse = {
 export function ProfileForm({ user, domains }: ProfileFormProps) {
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitProfile, initialState)
-  
-  const [strengthRankings, setStrengthRankings] = useState<Array<{ strengthId: string; position: number | null }>>(() => {
-    if (!user?.userStrengths?.length) return []
-    
-    return user.userStrengths
-      .map((us) => ({
-        strengthId: us.strengthId,
-        position: us.position ?? null,
-      }))
-      .sort((a, b) => {
-        if (a.position == null && b.position != null) return 1
-        if (a.position != null && b.position == null) return -1
-        if (a.position == null && b.position == null) return 0
-        return (a.position as number) - (b.position as number)
-      })
-  })
+  const { validRankings, setStrengthRankings, isComplete: isStrengthsComplete } = useStrengthRankings(user)
 
   // Handle success state and redirects
   useEffect(() => {
@@ -72,7 +55,6 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
 
   // Check if personal info is complete
   const isPersonalInfoComplete = user.age && user.career && user.hobbies && user.description
-  const isStrengthsComplete = strengthRankings.filter(r => r.position !== null).length === 5
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,7 +228,7 @@ export function ProfileForm({ user, domains }: ProfileFormProps) {
           <div className="space-y-6">
             <StrengthRankingSelector
               domains={domains}
-              selectedRankings={strengthRankings}
+              selectedRankings={validRankings}
               onChange={setStrengthRankings}
               disabled={isPending}
               name="strengthRankings"

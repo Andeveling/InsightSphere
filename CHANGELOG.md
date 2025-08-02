@@ -194,6 +194,9 @@ All notable changes to this project will be documented in this file.
 
 ## [1.2.1] - 2025-08-02
 
+### Added
+- Crea hook personalizado `useStrengthRankings` para manejar la lógica de selección y validación de fortalezas.
+
 ### Fixed
 - Corrige el mapeo de fortalezas en el formulario de perfil para incluir todas las fortalezas del usuario, incluso si alguna tiene posición nula.
 - Ajusta el filtrado y tipado de `selectedRankings` para evitar errores de tipo y asegurar que solo se envíen fortalezas válidas al selector.
@@ -204,6 +207,7 @@ All notable changes to this project will be documented in this file.
 - Simplifica la lógica de inicialización de fortalezas eliminando `useEffect` innecesario y props no utilizados.
 - Elimina logs de consola y lógica redundante para mejor rendimiento y mantenibilidad.
 - Agrega validación temprana para prevenir errores cuando el usuario no está disponible.
+- Extrae lógica compleja de fortalezas del componente ProfileForm a hook personalizado para mejor separación de responsabilidades.
 - Limpia lógicas de filtrado excesivas en las props de `StrengthRankingSelector`, moviendo la lógica de filtrado internamente al componente.
 - Simplifica la inicialización del estado en `StrengthRankingSelector` eliminando console.logs y debugging innecesario.
 - Remueve importaciones no utilizadas y optimiza el manejo de tipos para mejor performance.
