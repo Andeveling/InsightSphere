@@ -19,15 +19,6 @@ applyTo: '**/*.tsx, **/*.ts, **/*.jsx, **/*.js'
 6. **Template Literal Types**: Leverage TypeScript's string manipulation for type-safe APIs
 7. **Assertion Functions**: Use type predicates and assertion functions for runtime validation
 
-## 📚 Table of Contents
-
-1. [Essential Fundamentals](#essential-fundamentals)
-2. [The 4 Essential Patterns](#the-4-essential-patterns)
-3. [General Best Practices](#general-best-practices)
-4. [Advanced Techniques](#advanced-techniques)
-5. [TypeScript with React](#typescript-with-react)
-6. [Common Mistakes to Avoid](#common-mistakes-to-avoid)
-7. [Tools and Configuration](#tools-and-configuration)
 
 ---
 
