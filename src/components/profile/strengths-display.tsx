@@ -154,7 +154,7 @@ function StrengthCard({
         {hasExpandableContent && (
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="details" className="border-none">
-              <AccordionTrigger className="text-sm font-medium hover:no-underline py-2">
+              <AccordionTrigger className="text-sm font-medium hover:no-underline py-2 cursor-pointer text-primary">
                 Ver información detallada
               </AccordionTrigger>
               <AccordionContent className="space-y-4 pt-2">
